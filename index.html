@@ -2,11 +2,13 @@
 <style>
   :root{
     --ink:#0D0D11; --ink-2:#14141B;
-    --ion:#00F0FF; --violet:#7000FF;
+    --ion:#00F0FF; --violet:#7000FF; --live:#32D74B;
     --paper:#F2F1F7; --mute:#8B87A0; --line:rgba(255,255,255,.09);
     --display:"SF Pro Display",-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
     --body:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",sans-serif;
     --mono:ui-monospace,"SF Mono",Menlo,monospace;
+    /* El muelle de la app: response .22, dampingFraction .75. */
+    --spring:cubic-bezier(.22,.9,.28,1);
   }
   /* Compromiso deliberado con un solo mundo visual: la página ES la app.
      Un modo claro rompería la única idea que vende —una isla encendida en la
@@ -58,52 +60,49 @@
   .btn-ghost:hover{background:rgba(255,255,255,.07)}
   .fineprint{font-family:var(--mono);font-size:11.5px;color:var(--mute);letter-spacing:.04em}
 
-  /* ══ EL DEMO ══════════════════════════════════════════════════════════════
-     No es una captura: es la isla, funcionando. Se recrea con las mismas
-     medidas, la misma curva de muelle y el mismo ambilight que el panel real,
-     porque enseñar el gesto convence donde una imagen fija no llega. */
-  .demo{margin:56px auto 0;width:100%;max-width:860px}
+  /* ══ DEMO ═════════════════════════════════════════════════════════════════
+     Reconstrucción del panel real: mismos tokens de color, mismas medidas de
+     los módulos y el mismo muelle. Enseñar el gesto convence donde una captura
+     fija no llega, y además pesa una décima parte. */
+  .demo{margin:54px auto 0;width:100%;max-width:900px}
   .screen{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line);
     background:linear-gradient(165deg,#2F6FA8,#1E4E7C 55%,#16324F);
-    aspect-ratio:16/9;box-shadow:0 40px 100px rgba(0,0,0,.7)}
-  .menubar{position:absolute;inset:0 0 auto;height:26px;background:rgba(0,0,0,.28);
+    aspect-ratio:16/10;box-shadow:0 40px 100px rgba(0,0,0,.7)}
+  .menubar{position:absolute;inset:0 0 auto;height:24px;background:rgba(0,0,0,.26);
     backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:flex-end;
-    gap:11px;padding:0 14px;font-size:10px;color:rgba(255,255,255,.75);font-family:var(--mono)}
-  .menubar span{opacity:.8}
+    gap:12px;padding:0 13px;font-size:9.5px;color:rgba(255,255,255,.72);font-family:var(--mono)}
 
-  .island{position:absolute;left:50%;top:4px;transform:translateX(-50%);
-    background:#000;border-radius:16px;overflow:hidden;z-index:3;
-    width:190px;height:26px;
-    box-shadow:0 8px 26px rgba(0,0,0,.5);
-    transition:width .42s cubic-bezier(.2,.9,.25,1),height .42s cubic-bezier(.2,.9,.25,1),
-               border-radius .42s ease}
+  .island{position:absolute;left:50%;top:3px;transform:translateX(-50%);
+    background:#08080A;border-radius:15px;overflow:hidden;z-index:3;
+    width:196px;height:25px;box-shadow:0 8px 26px rgba(0,0,0,.5);
+    --art-a:#F0625A;--art-b:#7000FF;
+    transition:width .42s var(--spring),height .42s var(--spring),border-radius .42s ease}
   .island::before{content:"";position:absolute;inset:0;border-radius:inherit;
-    border:.5px solid rgba(255,255,255,.13);pointer-events:none;z-index:6}
-  /* Ambilight: la luz que la carátula derrama por el perímetro. La máscara es
-     una viñeta INVERTIDA —transparente en el centro— para que el texto siga
-     leyéndose sobre negro. */
+    border:.5px solid rgba(255,255,255,.11);pointer-events:none;z-index:9}
+  /* Ambilight: la carátula desenfocada y saturada, con viñeta INVERTIDA para
+     que el color se quede en el perímetro y el texto siga sobre negro. */
   .ambient{position:absolute;inset:0;opacity:0;transition:opacity .5s ease;z-index:1;
-    background:radial-gradient(120% 120% at 20% 20%,#F0625A,transparent 60%),
-               radial-gradient(120% 120% at 85% 75%,#7000FF,transparent 62%);
-    filter:blur(26px) saturate(1.6);
-    -webkit-mask-image:radial-gradient(closest-side,transparent 18%,#000 78%);
-    mask-image:radial-gradient(closest-side,transparent 18%,#000 78%)}
-  .island[data-state="open"] .ambient{opacity:.5}
+    background:radial-gradient(110% 110% at 18% 22%,var(--art-a),transparent 62%),
+               radial-gradient(110% 110% at 84% 78%,var(--art-b),transparent 64%);
+    filter:blur(24px) saturate(2.2);
+    -webkit-mask-image:radial-gradient(closest-side,transparent 14%,#000 72%);
+    mask-image:radial-gradient(closest-side,transparent 14%,#000 72%)}
+  .island[data-state="open"] .ambient,.island[data-state="edit"] .ambient{opacity:.55}
 
-  .collapsed,.expanded{position:absolute;inset:0;z-index:4;transition:opacity .22s ease}
-  .expanded{opacity:0;pointer-events:none}
-  .island[data-state="open"]{width:430px;height:150px;border-radius:20px}
-  .island[data-state="open"] .collapsed{opacity:0}
-  .island[data-state="open"] .expanded{opacity:1;pointer-events:auto}
-  .island[data-state="drop"]{width:250px;height:86px;border-radius:18px}
-  .island[data-state="drop"] .collapsed{opacity:0}
+  .pane{position:absolute;inset:0;z-index:4;transition:opacity .2s ease;opacity:0;pointer-events:none}
+  .island[data-state="idle"] .p-idle{opacity:1}
+  .island[data-state="open"] .p-open{opacity:1;pointer-events:auto}
+  .island[data-state="drop"] .p-drop{opacity:1}
+  .island[data-state="edit"] .p-edit{opacity:1;pointer-events:auto}
+  .island[data-state="open"]{width:462px;height:158px;border-radius:20px}
+  .island[data-state="drop"]{width:300px;height:104px;border-radius:19px}
+  .island[data-state="edit"]{width:462px;height:170px;border-radius:20px}
 
-  .collapsed{display:flex;align-items:center;justify-content:space-between;padding:0 7px}
-  .art{width:18px;height:18px;border-radius:5px;flex:none;
-    background:linear-gradient(140deg,#F0625A,#7000FF)}
-  /* Cuatro barras con retardos distintos: al mismo ritmo pero no a la vez, que
-     es lo que separa un ecualizador de un semáforo. */
-  .eq{display:flex;align-items:center;gap:2px;height:14px}
+  /* ── Replegada ── */
+  .p-idle{display:flex;align-items:center;justify-content:space-between;padding:0 6px}
+  .art{width:17px;height:17px;border-radius:5px;flex:none;
+    background:linear-gradient(140deg,var(--art-a),var(--art-b))}
+  .eq{display:flex;align-items:flex-end;gap:2px;height:13px}
   .eq i{display:block;width:2px;border-radius:99px;background:linear-gradient(180deg,var(--ion),var(--violet));
     animation:pulse 1.05s ease-in-out infinite;height:5px}
   .eq i:nth-child(1){animation-delay:-.15s}
@@ -112,37 +111,75 @@
   .eq i:nth-child(4){animation-delay:-.78s}
   @keyframes pulse{0%,100%{height:4px}50%{height:13px}}
 
-  .expanded{padding:11px 13px;display:flex;flex-direction:column;gap:9px}
-  .tabs{display:flex;gap:6px;align-items:center;font-size:9.5px;color:rgba(255,255,255,.55);
-    font-family:var(--mono);letter-spacing:.06em}
-  .tabs b{background:rgba(255,255,255,.12);color:#fff;border-radius:99px;padding:3px 9px;font-weight:600}
-  .row{display:flex;align-items:center;gap:11px;flex:1}
-  .cover{width:42px;height:42px;border-radius:9px;flex:none;
-    background:linear-gradient(140deg,#F0625A,#7000FF)}
-  .meta{min-width:0;flex:1}
-  .meta b{display:block;font-size:11.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .meta span{display:block;font-size:9.5px;color:rgba(255,255,255,.45)}
-  .bar{height:3px;border-radius:99px;background:rgba(255,255,255,.16);margin-top:6px;overflow:hidden}
-  .bar i{display:block;height:100%;width:38%;border-radius:99px;
-    background:linear-gradient(90deg,var(--ion),var(--violet))}
-  .tile{border:.5px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);
-    border-radius:9px;padding:7px 10px;font-size:10px;flex:none;text-align:center;line-height:1.35}
-  .tile em{display:block;font-style:normal;font-size:8.5px;color:rgba(255,255,255,.45);
-    font-family:var(--mono);letter-spacing:.09em;text-transform:uppercase}
-  .tile strong{font-size:15px;font-weight:600}
+  /* ── Desplegada: la banda modular real ── */
+  .p-open,.p-edit{padding:9px 12px 11px;display:flex;flex-direction:column;gap:8px}
+  .bar{display:flex;align-items:center;gap:7px;font-size:9.5px}
+  .tab{display:inline-flex;align-items:center;gap:4px;border-radius:99px;padding:3.5px 9px;
+    color:rgba(255,255,255,.5);font-weight:500}
+  .tab.on{background:rgba(255,255,255,.13);color:#fff;font-weight:600}
+  .bar .tools{margin-left:auto;display:flex;gap:9px;color:rgba(255,255,255,.42);font-size:11px}
+  .band{display:flex;align-items:center;gap:9px;flex:1;min-height:0}
 
-  .dropzone{position:absolute;inset:0;z-index:4;display:flex;align-items:center;justify-content:center;
-    gap:9px;font-size:11px;opacity:0;transition:opacity .22s ease}
-  .island[data-state="drop"] .dropzone{opacity:1}
-  .dropzone .ring{width:26px;height:26px;border-radius:8px;
-    border:1.5px dashed rgba(0,240,255,.75)}
+  /* Reproductor: 3 unidades de ancho, el módulo más grande de la banda. */
+  .mod{border:.5px solid rgba(255,255,255,.10);background:rgba(255,255,255,.075);
+    border-radius:11px;padding:7px 9px;display:flex;align-items:center;gap:8px;
+    transition:.25s var(--spring)}
+  .mod.player{flex:3;min-width:0}
+  .cover{width:36px;height:36px;border-radius:8px;flex:none;
+    background:linear-gradient(140deg,var(--art-a),var(--art-b))}
+  .track{min-width:0;flex:1}
+  .track b{display:block;font-size:10.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .track span{display:block;font-size:8.5px;color:rgba(255,255,255,.45);white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  .scrub{height:2.5px;border-radius:99px;background:rgba(255,255,255,.16);margin:5px 0 3px;overflow:hidden}
+  .scrub i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--art-a),var(--art-b));
+    width:22%;animation:seek 22s linear infinite}
+  @keyframes seek{from{width:8%}to{width:96%}}
+  .times{display:flex;justify-content:space-between;font-family:var(--mono);font-size:7.5px;
+    color:rgba(255,255,255,.4);font-variant-numeric:tabular-nums}
+  .transport{display:flex;gap:6px;align-items:center;color:rgba(255,255,255,.9);font-size:12px;flex:none}
+  .transport b{font-size:15px}
 
-  /* El cursor que arrastra: es el gesto entero contado sin una palabra. */
-  .drag{position:absolute;z-index:2;left:50%;top:62%;width:118px;padding:8px 11px;border-radius:9px;
-    background:rgba(20,20,27,.94);border:1px solid var(--line);font-size:10.5px;
+  /* Contexto: cambia según la app que tengas delante. */
+  .mod.context{flex:2;flex-direction:column;align-items:stretch;gap:5px;min-width:0}
+  .appname{font-family:var(--mono);font-size:7.5px;letter-spacing:.11em;text-transform:uppercase;
+    color:rgba(255,255,255,.5);display:flex;align-items:center;gap:5px;white-space:nowrap}
+  .dot{width:9px;height:9px;border-radius:2.5px;flex:none;background:var(--app-tint,#00F0FF)}
+  .acts{display:flex;gap:5px}
+  .act{border:.5px solid rgba(255,255,255,.13);border-radius:7px;padding:3.5px 7px;font-size:8.5px;
+    white-space:nowrap;color:rgba(255,255,255,.86);background:rgba(255,255,255,.05)}
+
+  .mod.tile{flex:1;flex-direction:column;align-items:center;gap:1px;text-align:center;padding:7px 6px}
+  .mod.tile em{font-style:normal;font-family:var(--mono);font-size:7.5px;letter-spacing:.1em;
+    text-transform:uppercase;color:rgba(255,255,255,.42)}
+  .mod.tile strong{font-size:15px;font-weight:600;letter-spacing:-.02em}
+
+  /* ── Arrastre ── */
+  .p-drop{display:flex;align-items:center;justify-content:center;gap:8px;padding:0 12px}
+  .target{flex:1;border-radius:11px;border:1px dashed rgba(255,255,255,.22);padding:9px 4px;
+    text-align:center;font-size:8.5px;color:rgba(255,255,255,.6);transition:.2s ease}
+  .target.hot{border-color:var(--ion);border-style:solid;color:#fff;
+    background:rgba(0,240,255,.12);box-shadow:0 0 20px rgba(0,240,255,.22)}
+  .target i{display:block;font-style:normal;font-size:13px;margin-bottom:2px}
+
+  /* ── Personalizar ── */
+  .p-edit .band{flex-wrap:wrap;gap:6px;align-content:flex-start}
+  .slot{border:.5px dashed rgba(255,255,255,.18);border-radius:9px;padding:6px 9px;font-size:8.5px;
+    color:rgba(255,255,255,.8);display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.04);
+    transition:.28s var(--spring)}
+  .slot .arrows{color:rgba(255,255,255,.35);letter-spacing:2px}
+  .slot.moving{border-color:var(--ion);background:rgba(0,240,255,.14);transform:translateY(-3px);
+    box-shadow:0 6px 18px rgba(0,240,255,.2)}
+  .presets{display:flex;gap:6px;align-items:center;font-size:8px;font-family:var(--mono);
+    letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.4)}
+  .presets b{background:rgba(0,240,255,.16);color:#fff;border-radius:99px;padding:3px 8px;font-weight:600}
+
+  .drag{position:absolute;z-index:2;left:50%;top:64%;width:126px;padding:8px 11px;border-radius:9px;
+    background:rgba(20,20,27,.94);border:1px solid var(--line);font-size:10px;
     box-shadow:0 12px 30px rgba(0,0,0,.5);opacity:0;pointer-events:none;
-    transform:translate(-50%,0);transition:opacity .3s ease,transform .75s cubic-bezier(.4,0,.2,1)}
-  .screen[data-step="drop"] .drag{opacity:1;transform:translate(-50%,-52%) scale(.86)}
+    transform:translate(-50%,0);transition:opacity .3s ease,transform .8s cubic-bezier(.4,0,.2,1)}
+  .drag b{font-family:var(--mono);font-size:13px;letter-spacing:.08em}
+  .screen[data-step="drop"] .drag{opacity:1;transform:translate(-50%,-48%) scale(.84)}
 
   .controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:20px}
   .chipbtn{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
@@ -153,6 +190,14 @@
     background:linear-gradient(100deg,var(--ion),var(--violet))}
   .demo-note{font-family:var(--mono);font-size:11.5px;color:var(--mute);text-align:center;
     margin-top:14px;letter-spacing:.04em}
+
+  /* ── Apoyo ── */
+  .support{border:1px solid var(--line);border-radius:18px;padding:32px 28px;background:var(--ink-2);
+    display:flex;gap:26px;align-items:center;flex-wrap:wrap;margin-top:22px;
+    background-image:radial-gradient(70% 120% at 0% 0%,rgba(112,0,255,.12),transparent 60%)}
+  .support div{flex:1;min-width:260px}
+  .support h3{margin-bottom:8px}
+  .support p{color:var(--mute);font-size:15px;margin:0}
 
   section{padding:104px 0}
   .head{display:flex;flex-direction:column;gap:18px;margin-bottom:50px;max-width:62ch}
@@ -217,10 +262,10 @@
     <p class="lede">Flit convierte la muesca del MacBook en un panel vivo: lo que suena, tu portapapeles, el clima y lo siguiente en tu agenda. Un gesto y está ahí.</p>
 
     <div class="cta">
-      <a class="btn btn-primary" href="https://github.com/dxni087/flit-releases/releases/latest">Descargar para macOS</a>
-      <a class="btn btn-ghost" href="#precios">Ver precios</a>
+      <a class="btn btn-primary" href="https://buy.stripe.com/cNi6oG6Vc4P80PF3iKcMM00">Reservar por 9 USD</a>
+      <a class="btn btn-ghost" href="#precios">Cómo funciona la reserva</a>
     </div>
-    <p class="fineprint">macOS 15 o superior · Apple Silicon e Intel · Reserva con devolución garantizada</p>
+    <p class="fineprint">macOS 15 o superior · Apple Silicon e Intel · Devolución íntegra si no se publica</p>
 
     <div class="demo">
       <div class="screen" id="screen" data-step="idle">
@@ -231,27 +276,67 @@
         <div class="island" id="island" data-state="idle">
           <div class="ambient"></div>
 
-          <div class="collapsed">
+          <!-- Replegada: carátula y pulso de lo que suena. -->
+          <div class="pane p-idle">
             <div class="art"></div>
             <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
           </div>
 
-          <div class="dropzone">
-            <div class="ring"></div>
-            <span>Suéltalo aquí</span>
+          <!-- Desplegada: la banda modular real. -->
+          <div class="pane p-open">
+            <div class="bar">
+              <span class="tab on">✈ Flit</span>
+              <span class="tab">Bandeja</span>
+              <span class="tools">≡ ⚙</span>
+            </div>
+            <div class="band">
+              <div class="mod player">
+                <div class="cover"></div>
+                <div class="track">
+                  <b>Good Reason</b>
+                  <span>Gracie Abrams</span>
+                  <div class="scrub"><i></i></div>
+                  <div class="times"><span>0:45</span><span>-3:24</span></div>
+                </div>
+                <div class="transport">⏮ <b>⏸</b> ⏭</div>
+              </div>
+
+              <div class="mod context" id="context">
+                <div class="appname"><span class="dot"></span><span id="appname">TERMINAL</span></div>
+                <div class="acts" id="acts">
+                  <span class="act">⑂ Rama</span>
+                  <span class="act">{} Enviar</span>
+                </div>
+              </div>
+
+              <div class="mod tile"><em>Clima</em><strong>24°</strong></div>
+              <div class="mod tile"><em>Batería</em><strong>92%</strong></div>
+            </div>
           </div>
 
-          <div class="expanded">
-            <div class="tabs"><b>Flit</b><span>Bandeja</span></div>
-            <div class="row">
-              <div class="cover"></div>
-              <div class="meta">
-                <b>Good Reason</b>
-                <span>Gracie Abrams</span>
-                <div class="bar"><i></i></div>
-              </div>
-              <div class="tile"><em>Clima</em><strong>24°</strong></div>
-              <div class="tile"><em>Batería</em><strong>92%</strong></div>
+          <!-- Arrastre: los destinos del portal. -->
+          <div class="pane p-drop">
+            <div class="target hot"><i>↓</i>Guardar</div>
+            <div class="target"><i>◈</i>AirDrop</div>
+            <div class="target"><i>▦</i>QR</div>
+            <div class="target"><i>◫</i>Texto</div>
+          </div>
+
+          <!-- Personalizar: mover módulos y guardar preajustes. -->
+          <div class="pane p-edit">
+            <div class="bar">
+              <span class="tab on">Personalizar</span>
+              <span class="presets"><b>Trabajo</b><span>Música</span><span>Mínimo</span></span>
+              <span class="tools">⚙</span>
+            </div>
+            <div class="band" id="slots">
+              <span class="slot"><span class="arrows">‹ ›</span>Reproductor</span>
+              <span class="slot"><span class="arrows">‹ ›</span>Portapapeles</span>
+              <span class="slot"><span class="arrows">‹ ›</span>Contexto</span>
+              <span class="slot"><span class="arrows">‹ ›</span>Clima</span>
+              <span class="slot"><span class="arrows">‹ ›</span>Batería</span>
+              <span class="slot"><span class="arrows">‹ ›</span>Dictado</span>
+              <span class="slot"><span class="arrows">‹ ›</span>Volumen</span>
             </div>
           </div>
         </div>
@@ -261,8 +346,9 @@
         <button class="chipbtn" data-go="idle" aria-pressed="true">Sonando</button>
         <button class="chipbtn" data-go="open" aria-pressed="false">Al acercarte</button>
         <button class="chipbtn" data-go="drop" aria-pressed="false">Al arrastrar</button>
+        <button class="chipbtn" data-go="edit" aria-pressed="false">Personalizar</button>
       </div>
-      <p class="demo-note">Esto no es un vídeo. Es la isla, con las mismas medidas y la misma curva de animación que la app.</p>
+      <p class="demo-note">No es un vídeo: es la isla, con los colores, las medidas y el muelle de la app.</p>
     </div>
   </div>
 </header>
@@ -271,7 +357,7 @@
   <div class="wrap">
     <div class="head">
       <span class="eyebrow">Qué hace</span>
-      <h2>Ocho cosas que ya no tienes que abrir</h2>
+      <h2>Nueve cosas que ya no tienes que abrir</h2>
       <p class="lede">Cada módulo ocupa el sitio que le corresponde y ni uno más. Los mueves, los quitas y los guardas como preajuste.</p>
     </div>
 
@@ -303,8 +389,13 @@
       </article>
       <article class="card">
         <span class="chip">Contexto</span>
-        <h3>Se adapta a lo que usas</h3>
-        <p>En una llamada aparece silenciar. En el editor, tu rama de git. El panel cambia según la app que tengas delante.</p>
+        <h3>Cambia con la app que usas</h3>
+        <p>En la terminal, tu rama de git. En una llamada, silenciar. En el navegador, enviar la pestaña. El panel se adapta solo.</p>
+      </article>
+      <article class="card">
+        <span class="chip">A tu manera</span>
+        <h3>Tú decides qué aparece</h3>
+        <p>Arrastra los módulos, cámbialos de orilla, quita los que no uses y guarda combinaciones como preajustes con nombre.</p>
       </article>
       <article class="card">
         <span class="chip">En tu Mac</span>
@@ -350,7 +441,7 @@
           <li class="off">Módulos personalizables</li>
           <li class="off">Gestos, OCR y dictado</li>
         </ul>
-        <a class="btn btn-ghost" href="https://github.com/dxni087/flit-releases/releases/latest">Descargar</a>
+        <span class="btn btn-ghost" style="opacity:.6;cursor:default">Al publicar la 1.0</span>
       </div>
 
       <div class="tier best">
@@ -368,7 +459,7 @@
           <li>2 Macs · actualizaciones de por vida</li>
           <li>Flit Sync incluido cuando llegue, sin cuota</li>
         </ul>
-        <a class="btn btn-primary" href="#" data-checkout>Apoyar y reservar — 9 USD</a>
+        <a class="btn btn-primary" href="https://buy.stripe.com/cNi6oG6Vc4P80PF3iKcMM00">Apoyar y reservar — 9 USD</a>
       </div>
 
       <div class="tier">
@@ -383,6 +474,14 @@
         </ul>
         <span class="btn btn-ghost" style="opacity:.6;cursor:default">Disponible al lanzar</span>
       </div>
+    </div>
+
+    <div class="support">
+      <div>
+        <h3>¿Prefieres solo echar una mano?</h3>
+        <p>Una aportación libre, sin licencia ni compromiso. Va entera a la firma de desarrollador y al tiempo de desarrollo. Desde 2 USD.</p>
+      </div>
+      <a class="btn btn-ghost" href="https://buy.stripe.com/7sY00idjA81kcynbPgcMM01">Aportar lo que quieras</a>
     </div>
   </div>
 </section>
@@ -402,6 +501,7 @@
           <tr><td>Precio</td><td class="num">9 – 19 USD una vez</td><td class="num">15 – 25 USD una vez</td><td class="num">0</td></tr>
           <tr><td>Ecualizador con audio real del sistema</td><td class="yes">Sí</td><td>No</td><td>No</td></tr>
           <tr><td>Vídeo del navegador como fuente</td><td class="yes">Sí</td><td>Parcial</td><td>No</td></tr>
+          <tr><td>Acciones según la app en primer plano</td><td class="yes">Sí</td><td>No</td><td>No</td></tr>
           <tr><td>Módulos reordenables y preajustes</td><td class="yes">Sí</td><td>Parcial</td><td>Parcial</td></tr>
           <tr><td>OCR y dictado en el dispositivo</td><td class="yes">Sí</td><td>No</td><td>No</td></tr>
           <tr><td>Servidores y cuenta</td><td class="yes">Ninguno</td><td>Según el caso</td><td>Ninguno</td></tr>
@@ -414,7 +514,7 @@
 <footer>
   <div class="wrap footrow">
     <span>Flit · hecho en México</span>
-    <span class="fineprint">macOS 15+ · Descarga directa en GitHub</span>
+    <span class="fineprint">macOS 15+ · Pagos con Stripe</span>
   </div>
 </footer>
 
@@ -423,18 +523,50 @@
   const island = document.getElementById('island');
   const screen = document.getElementById('screen');
   const buttons = [...document.querySelectorAll('[data-go]')];
-  // Secuencia del bucle: reposo → desplegada → reposo → arrastre. Vuelve a
-  // reposo entre estados para que se vea la transición, que es lo que se vende.
-  const loop = ['idle', 'open', 'idle', 'drop'];
-  const hold = { idle: 2000, open: 3400, drop: 2600 };
+  const loop = ['idle', 'open', 'drop', 'open', 'edit'];
+  const hold = { idle: 2200, open: 4200, drop: 2800, edit: 4200 };
   let step = 0, timer = null, manual = false;
-
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // El módulo de contexto es la función que menos se entiende leyéndola y la
+  // que más se entiende viéndola, así que el demo la cicla por su cuenta.
+  const apps = [
+    { name: 'TERMINAL', tint: '#32D74B', acts: ['\u2442 Rama', '{} Enviar'] },
+    { name: 'TEAMS',    tint: '#7000FF', acts: ['Silenciar', 'Salir'] },
+    { name: 'CHROME',   tint: '#00F0FF', acts: ['Enviar pestaña', 'Leer'] },
+    { name: 'FIGMA',    tint: '#F0625A', acts: ['Copiar enlace', 'Compartir'] },
+  ];
+  let appIndex = 0;
+  const context = document.getElementById('context');
+  const appName = document.getElementById('appname');
+  const acts = document.getElementById('acts');
+
+  function nextApp() {
+    const app = apps[appIndex = (appIndex + 1) % apps.length];
+    context.style.setProperty('--app-tint', app.tint);
+    appName.textContent = app.name;
+    acts.innerHTML = app.acts.map(a => `<span class="act">${a}</span>`).join('');
+  }
+
+  // Y en "Personalizar", un módulo cambia de sitio solo: el gesto que la
+  // palabra "reordenable" no transmite.
+  const slots = document.getElementById('slots');
+  function shuffleSlot() {
+    const items = [...slots.children];
+    const moving = items[2];
+    moving.classList.add('moving');
+    setTimeout(() => {
+      slots.insertBefore(moving, items[0]);
+      setTimeout(() => moving.classList.remove('moving'), 420);
+    }, 380);
+  }
 
   function paint(state) {
     island.dataset.state = state;
     screen.dataset.step = state;
     buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.go === state)));
+    if (state === 'open') nextApp();
+    if (state === 'edit') shuffleSlot();
   }
 
   function tick() {
@@ -449,20 +581,17 @@
       manual = true;
       clearTimeout(timer);
       paint(button.dataset.go);
-      // Vuelve al bucle solo: quien pulsó ya vio lo que quería y la página
-      // sigue enseñando el resto sin pedirle nada más.
-      setTimeout(() => { manual = false; tick(); }, 6000);
+      setTimeout(() => { manual = false; tick(); }, 7000);
     });
   });
 
-  // Acercar el ratón a la isla la despliega, igual que en la app.
   island.addEventListener('mouseenter', () => {
-    if (island.dataset.state === 'drop') return;
+    if (island.dataset.state !== 'idle') return;
     manual = true; clearTimeout(timer); paint('open');
   });
   island.addEventListener('mouseleave', () => {
     manual = false; clearTimeout(timer); paint('idle');
-    timer = setTimeout(tick, 1200);
+    timer = setTimeout(tick, 1400);
   });
 
   if (reduced) { paint('open'); } else { tick(); }
