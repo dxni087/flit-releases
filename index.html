@@ -60,126 +60,189 @@
   .btn-ghost:hover{background:rgba(255,255,255,.07)}
   .fineprint{font-family:var(--mono);font-size:11.5px;color:var(--mute);letter-spacing:.04em}
 
-  /* ══ DEMO ═════════════════════════════════════════════════════════════════
-     Reconstrucción del panel real: mismos tokens de color, mismas medidas de
-     los módulos y el mismo muelle. Enseñar el gesto convence donde una captura
-     fija no llega, y además pesa una décima parte. */
-  .demo{margin:54px auto 0;width:100%;max-width:900px}
-  .screen{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line);
+  /* ══ DEMO — PORT 1:1 DEL PANEL EN SWIFT ═══════════════════════════════════
+     Cada número de aquí sale del código, no de mirar una captura:
+
+       NotchController.swift   580 × (barHeight 32 + 128) · radio 26
+       NotchBoardView.swift    padding h16 · spacing 11 · banda 74 · gap 10
+                               pestañas: icono 9 bold, texto 11 semibold
+       ModuleViews.swift       carátula 52 r11 · título 13 · artista 10
+                               transporte primario 34, secundario 28
+                               MiniAction alto 40 r11 · Scrubber alto 3
+       FlitSurface.swift       relleno blanco .075 · borde blanco .10 a 0.8
+       FlitDesign.swift        obsidiana 0D0D11 · ion 00F0FF · violeta 7000FF
+       NotchIslandView.swift   portal: 5 destinos, spacing 16
+
+     La escala sale de `cqw`: el panel se dibuja en PUNTOS reales sobre una
+     pantalla de 1512 pt —la del MacBook Pro de 14"— y todo se reduce en bloque.
+     Por eso las proporciones son las de la app y no una interpretación. */
+  .demo{margin:54px auto 0;width:100%;max-width:940px;container-type:inline-size}
+  .screen{--pt:calc(100cqw / 1512);position:relative;border-radius:16px;overflow:hidden;
+    border:1px solid var(--line);aspect-ratio:1512/945;
     background:linear-gradient(165deg,#2F6FA8,#1E4E7C 55%,#16324F);
-    aspect-ratio:16/10;box-shadow:0 40px 100px rgba(0,0,0,.7)}
-  .menubar{position:absolute;inset:0 0 auto;height:24px;background:rgba(0,0,0,.26);
-    backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:flex-end;
-    gap:12px;padding:0 13px;font-size:9.5px;color:rgba(255,255,255,.72);font-family:var(--mono)}
+    box-shadow:0 40px 100px rgba(0,0,0,.7)}
+  .menubar{position:absolute;inset:0 0 auto;height:calc(37 * var(--pt));
+    background:rgba(0,0,0,.24);backdrop-filter:blur(10px);display:flex;align-items:center;
+    justify-content:flex-end;gap:calc(18 * var(--pt));padding:0 calc(20 * var(--pt));
+    font-size:calc(13 * var(--pt));color:rgba(255,255,255,.75)}
 
-  .island{position:absolute;left:50%;top:3px;transform:translateX(-50%);
-    background:#08080A;border-radius:15px;overflow:hidden;z-index:3;
-    width:196px;height:25px;box-shadow:0 8px 26px rgba(0,0,0,.5);
-    --art-a:#F0625A;--art-b:#7000FF;
+  /* NotchController.interactiveSize + NotchIslandView.radius */
+  .island{position:absolute;left:50%;top:0;transform:translateX(-50%);background:#000;
+    overflow:hidden;z-index:3;width:calc(200 * var(--pt));height:calc(37 * var(--pt));
+    border-radius:0 0 calc(14 * var(--pt)) calc(14 * var(--pt));
     transition:width .42s var(--spring),height .42s var(--spring),border-radius .42s ease}
-  .island::before{content:"";position:absolute;inset:0;border-radius:inherit;
-    border:.5px solid rgba(255,255,255,.11);pointer-events:none;z-index:9}
-  /* Ambilight: la carátula desenfocada y saturada, con viñeta INVERTIDA para
-     que el color se quede en el perímetro y el texto siga sobre negro. */
+  .island[data-state="open"]{width:calc(580 * var(--pt));height:calc(165 * var(--pt));
+    border-radius:0 0 calc(26 * var(--pt)) calc(26 * var(--pt))}
+  .island[data-state="drop"]{width:calc(520 * var(--pt));height:calc(155 * var(--pt));
+    border-radius:0 0 calc(26 * var(--pt)) calc(26 * var(--pt))}
+  .island[data-state="edit"]{width:calc(580 * var(--pt));height:calc(209 * var(--pt));
+    border-radius:0 0 calc(26 * var(--pt)) calc(26 * var(--pt))}
+
+  /* livingGlow: carátula desenfocada 42, saturación 2.2, opacidad .34,
+     con máscara de viñeta invertida (radios .11 → .58 del ancho). */
   .ambient{position:absolute;inset:0;opacity:0;transition:opacity .5s ease;z-index:1;
-    background:radial-gradient(110% 110% at 18% 22%,var(--art-a),transparent 62%),
-               radial-gradient(110% 110% at 84% 78%,var(--art-b),transparent 64%);
-    filter:blur(24px) saturate(2.2);
-    -webkit-mask-image:radial-gradient(closest-side,transparent 14%,#000 72%);
-    mask-image:radial-gradient(closest-side,transparent 14%,#000 72%)}
-  .island[data-state="open"] .ambient,.island[data-state="edit"] .ambient{opacity:.55}
+    background:radial-gradient(circle at 30% 30%,var(--art-a),transparent 58%),
+               radial-gradient(circle at 72% 70%,var(--art-b),transparent 60%);
+    filter:blur(calc(42 * var(--pt))) saturate(2.2);
+    -webkit-mask-image:radial-gradient(closest-side,transparent 11%,#000 58%);
+    mask-image:radial-gradient(closest-side,transparent 11%,#000 58%)}
+  .island{--art-a:#E0574F;--art-b:#7000FF}
+  .island[data-state="open"] .ambient,.island[data-state="edit"] .ambient{opacity:.34}
 
-  .pane{position:absolute;inset:0;z-index:4;transition:opacity .2s ease;opacity:0;pointer-events:none}
+  .pane{position:absolute;inset:0;z-index:4;transition:opacity .18s ease;opacity:0;pointer-events:none}
   .island[data-state="idle"] .p-idle{opacity:1}
-  .island[data-state="open"] .p-open{opacity:1;pointer-events:auto}
+  .island[data-state="open"] .p-open{opacity:1}
   .island[data-state="drop"] .p-drop{opacity:1}
-  .island[data-state="edit"] .p-edit{opacity:1;pointer-events:auto}
-  .island[data-state="open"]{width:462px;height:158px;border-radius:20px}
-  .island[data-state="drop"]{width:300px;height:104px;border-radius:19px}
-  .island[data-state="edit"]{width:462px;height:170px;border-radius:20px}
+  .island[data-state="edit"] .p-edit{opacity:1}
 
-  /* ── Replegada ── */
-  .p-idle{display:flex;align-items:center;justify-content:space-between;padding:0 6px}
-  .art{width:17px;height:17px;border-radius:5px;flex:none;
+  /* Estado replegado: lo que flanquea el notch. */
+  .p-idle{display:flex;align-items:center;justify-content:space-between;
+    padding:0 calc(9 * var(--pt))}
+  .art{width:calc(20 * var(--pt));height:calc(20 * var(--pt));
+    border-radius:calc(5 * var(--pt));flex:none;
     background:linear-gradient(140deg,var(--art-a),var(--art-b))}
-  .eq{display:flex;align-items:flex-end;gap:2px;height:13px}
-  .eq i{display:block;width:2px;border-radius:99px;background:linear-gradient(180deg,var(--ion),var(--violet));
-    animation:pulse 1.05s ease-in-out infinite;height:5px}
+  .eq{display:flex;align-items:center;gap:calc(2.5 * var(--pt));height:calc(16 * var(--pt))}
+  .eq i{display:block;width:calc(2.5 * var(--pt));border-radius:99px;
+    background:linear-gradient(180deg,var(--ion),var(--violet));
+    animation:pulse 1.05s ease-in-out infinite;height:calc(4 * var(--pt))}
   .eq i:nth-child(1){animation-delay:-.15s}
   .eq i:nth-child(2){animation-delay:-.55s}
   .eq i:nth-child(3){animation-delay:-.32s}
-  .eq i:nth-child(4){animation-delay:-.78s}
-  @keyframes pulse{0%,100%{height:4px}50%{height:13px}}
+  @keyframes pulse{0%,100%{height:calc(4 * var(--pt))}50%{height:calc(16 * var(--pt))}}
 
-  /* ── Desplegada: la banda modular real ── */
-  .p-open,.p-edit{padding:9px 12px 11px;display:flex;flex-direction:column;gap:8px}
-  .bar{display:flex;align-items:center;gap:7px;font-size:9.5px}
-  .tab{display:inline-flex;align-items:center;gap:4px;border-radius:99px;padding:3.5px 9px;
-    color:rgba(255,255,255,.5);font-weight:500}
-  .tab.on{background:rgba(255,255,255,.13);color:#fff;font-weight:600}
-  .bar .tools{margin-left:auto;display:flex;gap:9px;color:rgba(255,255,255,.42);font-size:11px}
-  .band{display:flex;align-items:center;gap:9px;flex:1;min-height:0}
+  /* NotchBoardView: VStack(spacing: 11) + padding h16 b12, bajo la barra. */
+  .board{position:absolute;left:0;right:0;top:calc(37 * var(--pt));bottom:0;
+    padding:0 calc(16 * var(--pt)) calc(12 * var(--pt));
+    display:flex;flex-direction:column;gap:calc(11 * var(--pt))}
+  .tabs{display:flex;align-items:center;gap:calc(6 * var(--pt))}
+  .tab{display:inline-flex;align-items:center;gap:calc(5 * var(--pt));
+    padding:calc(5 * var(--pt)) calc(10 * var(--pt));border-radius:99px;
+    font:600 calc(11 * var(--pt))/1 ui-rounded,var(--body);color:rgba(255,255,255,.4)}
+  .tab .sym{font-size:calc(9 * var(--pt));font-weight:700}
+  .tab.on{background:rgba(255,255,255,.12);color:#fff}
+  .tools{margin-left:auto;display:flex;gap:calc(9 * var(--pt));
+    font-size:calc(11 * var(--pt));color:rgba(255,255,255,.35)}
 
-  /* Reproductor: 3 unidades de ancho, el módulo más grande de la banda. */
-  .mod{border:.5px solid rgba(255,255,255,.10);background:rgba(255,255,255,.075);
-    border-radius:11px;padding:7px 9px;display:flex;align-items:center;gap:8px;
-    transition:.25s var(--spring)}
-  .mod.player{flex:3;min-width:0}
-  .cover{width:36px;height:36px;border-radius:8px;flex:none;
-    background:linear-gradient(140deg,var(--art-a),var(--art-b))}
-  .track{min-width:0;flex:1}
-  .track b{display:block;font-size:10.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .track span{display:block;font-size:8.5px;color:rgba(255,255,255,.45);white-space:nowrap;
-    overflow:hidden;text-overflow:ellipsis}
-  .scrub{height:2.5px;border-radius:99px;background:rgba(255,255,255,.16);margin:5px 0 3px;overflow:hidden}
-  .scrub i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--art-a),var(--art-b));
-    width:22%;animation:seek 22s linear infinite}
-  @keyframes seek{from{width:8%}to{width:96%}}
-  .times{display:flex;justify-content:space-between;font-family:var(--mono);font-size:7.5px;
-    color:rgba(255,255,255,.4);font-variant-numeric:tabular-nums}
-  .transport{display:flex;gap:6px;align-items:center;color:rgba(255,255,255,.9);font-size:12px;flex:none}
-  .transport b{font-size:15px}
+  /* Banda: alto 74, HStack(spacing: 10), anchos proporcionales por unidades.
+     580 − 32 de padding − 20 de huecos = 528 / 6 unidades = 88 pt por unidad. */
+  .band{height:calc(74 * var(--pt));display:flex;gap:calc(10 * var(--pt));align-items:stretch}
+  .u3{width:calc(264 * var(--pt))} .u2{width:calc(176 * var(--pt))} .u1{width:calc(88 * var(--pt))}
 
-  /* Contexto: cambia según la app que tengas delante. */
-  .mod.context{flex:2;flex-direction:column;align-items:stretch;gap:5px;min-width:0}
-  .appname{font-family:var(--mono);font-size:7.5px;letter-spacing:.11em;text-transform:uppercase;
-    color:rgba(255,255,255,.5);display:flex;align-items:center;gap:5px;white-space:nowrap}
-  .dot{width:9px;height:9px;border-radius:2.5px;flex:none;background:var(--app-tint,#00F0FF)}
-  .acts{display:flex;gap:5px}
-  .act{border:.5px solid rgba(255,255,255,.13);border-radius:7px;padding:3.5px 7px;font-size:8.5px;
-    white-space:nowrap;color:rgba(255,255,255,.86);background:rgba(255,255,255,.05)}
+  /* FlitSurface(.dark): relleno .075, borde .10 a 0.8, radio 12 del envoltorio. */
+  .mod{border-radius:calc(12 * var(--pt));background:rgba(255,255,255,.075);
+    border:calc(.8 * var(--pt)) solid rgba(255,255,255,.10);
+    padding:calc(8 * var(--pt)) calc(9 * var(--pt));display:flex;align-items:center;
+    min-width:0;transition:.25s var(--spring)}
 
-  .mod.tile{flex:1;flex-direction:column;align-items:center;gap:1px;text-align:center;padding:7px 6px}
-  .mod.tile em{font-style:normal;font-family:var(--mono);font-size:7.5px;letter-spacing:.1em;
+  /* MediaModule: HStack(spacing: 11), carátula 52 r11. */
+  .media{gap:calc(11 * var(--pt))}
+  .cover{width:calc(52 * var(--pt));height:calc(52 * var(--pt));flex:none;
+    border-radius:calc(11 * var(--pt));position:relative;
+    background:linear-gradient(140deg,var(--art-a),var(--art-b));
+    box-shadow:0 calc(2 * var(--pt)) calc(7 * var(--pt)) rgba(0,0,0,.5)}
+  .track{min-width:0;flex:1;display:flex;flex-direction:column;gap:calc(4 * var(--pt))}
+  .track b{display:block;font:600 calc(13 * var(--pt))/1.15 var(--body);color:#fff;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .track em{display:block;font:500 calc(10 * var(--pt))/1.2 var(--body);font-style:normal;
+    color:rgba(255,255,255,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* Scrubber: VStack(spacing: 3), pista alto 3, etiquetas 9 semibold redondeadas. */
+  .scrub{display:flex;flex-direction:column;gap:calc(3 * var(--pt))}
+  .scrub .rail{height:calc(3 * var(--pt));border-radius:99px;background:rgba(255,255,255,.15);overflow:hidden}
+  .scrub .rail i{display:block;height:100%;border-radius:99px;width:22%;
+    background:var(--art-a);animation:seek 24s linear infinite}
+  @keyframes seek{from{width:6%}to{width:97%}}
+  .scrub .times{display:flex;justify-content:space-between;
+    font:500 calc(9 * var(--pt))/1 ui-rounded,var(--mono);color:rgba(255,255,255,.45);
+    font-variant-numeric:tabular-nums}
+  /* TransportButton: primario 34 con símbolo 18. `ViewThatFits` deja SOLO el
+     play cuando el módulo mide 264 pt — por eso aquí hay un botón, no tres. */
+  .transport{width:calc(34 * var(--pt));height:calc(34 * var(--pt));flex:none;
+    border-radius:99px;background:rgba(255,255,255,.12);display:grid;place-items:center;
+    font-size:calc(18 * var(--pt));color:#fff}
+
+  /* ContextModule: VStack(spacing: 7), flitCaption + fila de acciones spacing 6. */
+  .ctx{flex-direction:column;align-items:stretch;gap:calc(7 * var(--pt));justify-content:center}
+  .ctxname{display:flex;align-items:center;gap:calc(5 * var(--pt));
+    font:600 calc(10 * var(--pt))/1 ui-rounded,var(--body);letter-spacing:.06em;
+    text-transform:uppercase;color:rgba(255,255,255,.45);white-space:nowrap}
+  .ctxname .dot{width:calc(14 * var(--pt));height:calc(14 * var(--pt));flex:none;
+    border-radius:calc(3.5 * var(--pt));background:var(--app-tint,#00F0FF)}
+  .ctxacts{display:flex;gap:calc(6 * var(--pt))}
+  /* MiniAction: alto 40, radio 11, símbolo 13, etiqueta 10 semibold. */
+  .act{flex:1;height:calc(30 * var(--pt));border-radius:calc(11 * var(--pt));
+    background:rgba(255,255,255,.075);border:calc(.8 * var(--pt)) solid rgba(255,255,255,.10);
+    display:flex;align-items:center;justify-content:center;gap:calc(4 * var(--pt));
+    font:600 calc(10 * var(--pt))/1 ui-rounded,var(--body);color:#fff;white-space:nowrap}
+  .act .sym{font-size:calc(13 * var(--pt));font-weight:500;color:var(--app-tint,#00F0FF)}
+
+  /* WeatherModule: HStack(spacing: 7), símbolo 17 + flitMetric(17). */
+  .tile{flex-direction:column;justify-content:center;align-items:center;gap:calc(1 * var(--pt))}
+  .tile .val{display:flex;align-items:center;gap:calc(7 * var(--pt));
+    font:600 calc(17 * var(--pt))/1 ui-rounded,var(--body);letter-spacing:-.5px;
+    font-variant-numeric:tabular-nums;color:#fff}
+  .tile .cap{font:600 calc(10 * var(--pt))/1 ui-rounded,var(--body);letter-spacing:.6px;
     text-transform:uppercase;color:rgba(255,255,255,.42)}
-  .mod.tile strong{font-size:15px;font-weight:600;letter-spacing:-.02em}
 
-  /* ── Arrastre ── */
-  .p-drop{display:flex;align-items:center;justify-content:center;gap:8px;padding:0 12px}
-  .target{flex:1;border-radius:11px;border:1px dashed rgba(255,255,255,.22);padding:9px 4px;
-    text-align:center;font-size:8.5px;color:rgba(255,255,255,.6);transition:.2s ease}
-  .target.hot{border-color:var(--ion);border-style:solid;color:#fff;
-    background:rgba(0,240,255,.12);box-shadow:0 0 20px rgba(0,240,255,.22)}
-  .target i{display:block;font-style:normal;font-size:13px;margin-bottom:2px}
+  /* Portal: VStack(spacing: 6), cabecera 10, 5 destinos con HStack(spacing: 16). */
+  .p-drop{display:flex;flex-direction:column;gap:calc(6 * var(--pt));
+    padding:calc(23 * var(--pt)) calc(16 * var(--pt)) 0;align-items:center}
+  .p-drop .hint{display:flex;align-items:center;gap:calc(6 * var(--pt));
+    font:500 calc(10 * var(--pt))/1 ui-rounded,var(--body);color:rgba(255,255,255,.45)}
+  .p-drop .hint span:first-child{color:var(--ion);font-size:calc(10 * var(--pt))}
+  .dests{display:flex;gap:calc(16 * var(--pt));padding-top:calc(14 * var(--pt));width:100%}
+  .dest{flex:1;display:flex;flex-direction:column;align-items:center;gap:calc(5 * var(--pt));
+    transition:.25s var(--spring)}
+  .dest .ring{width:calc(38 * var(--pt));height:calc(38 * var(--pt));border-radius:99px;
+    display:grid;place-items:center;font-size:calc(15 * var(--pt));color:#fff;
+    background:rgba(255,255,255,.09);border:calc(.8 * var(--pt)) solid rgba(255,255,255,.14)}
+  .dest .lbl{font:600 calc(10 * var(--pt))/1 ui-rounded,var(--body);color:rgba(255,255,255,.5)}
+  .dest.hot .ring{background:rgba(0,240,255,.22);border-color:var(--ion);
+    box-shadow:0 0 calc(16 * var(--pt)) rgba(0,240,255,.4)}
+  .dest.hot{transform:scale(1.08)}
+  .dest.dim{opacity:.35}
 
-  /* ── Personalizar ── */
-  .p-edit .band{flex-wrap:wrap;gap:6px;align-content:flex-start}
-  .slot{border:.5px dashed rgba(255,255,255,.18);border-radius:9px;padding:6px 9px;font-size:8.5px;
-    color:rgba(255,255,255,.8);display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.04);
-    transition:.28s var(--spring)}
-  .slot .arrows{color:rgba(255,255,255,.35);letter-spacing:2px}
-  .slot.moving{border-color:var(--ion);background:rgba(0,240,255,.14);transform:translateY(-3px);
-    box-shadow:0 6px 18px rgba(0,240,255,.2)}
-  .presets{display:flex;gap:6px;align-items:center;font-size:8px;font-family:var(--mono);
-    letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.4)}
-  .presets b{background:rgba(0,240,255,.16);color:#fff;border-radius:99px;padding:3px 8px;font-weight:600}
+  /* Modo edición: los módulos con sus flechas ‹ › y la paleta debajo. */
+  .p-edit .band .mod{border-style:dashed;border-color:rgba(255,255,255,.22)}
+  .arrows{position:absolute;bottom:calc(3 * var(--pt));left:0;right:0;display:flex;
+    justify-content:center;gap:calc(10 * var(--pt));font-size:calc(10 * var(--pt));
+    color:rgba(255,255,255,.4)}
+  .modwrap{position:relative;display:flex}
+  .palette{display:flex;gap:calc(6 * var(--pt));flex-wrap:wrap;
+    padding-top:calc(2 * var(--pt))}
+  .pill{padding:calc(5 * var(--pt)) calc(10 * var(--pt));border-radius:99px;
+    background:rgba(255,255,255,.075);border:calc(.8 * var(--pt)) solid rgba(255,255,255,.10);
+    font:600 calc(10 * var(--pt))/1 ui-rounded,var(--body);color:rgba(255,255,255,.75);
+    white-space:nowrap;transition:.28s var(--spring)}
+  .pill.moving{background:rgba(0,240,255,.16);border-color:var(--ion);color:#fff;
+    transform:translateY(calc(-3 * var(--pt)))}
 
-  .drag{position:absolute;z-index:2;left:50%;top:64%;width:126px;padding:8px 11px;border-radius:9px;
-    background:rgba(20,20,27,.94);border:1px solid var(--line);font-size:10px;
-    box-shadow:0 12px 30px rgba(0,0,0,.5);opacity:0;pointer-events:none;
-    transform:translate(-50%,0);transition:opacity .3s ease,transform .8s cubic-bezier(.4,0,.2,1)}
-  .drag b{font-family:var(--mono);font-size:13px;letter-spacing:.08em}
-  .screen[data-step="drop"] .drag{opacity:1;transform:translate(-50%,-48%) scale(.84)}
+  .drag{position:absolute;z-index:2;left:50%;top:58%;padding:calc(9 * var(--pt)) calc(12 * var(--pt));
+    border-radius:calc(9 * var(--pt));background:rgba(20,20,27,.94);border:1px solid var(--line);
+    font-size:calc(11 * var(--pt));color:var(--paper);box-shadow:0 12px 30px rgba(0,0,0,.5);
+    opacity:0;pointer-events:none;transform:translate(-50%,0);
+    transition:opacity .3s ease,transform .8s cubic-bezier(.4,0,.2,1)}
+  .drag b{font-family:var(--mono);font-size:calc(14 * var(--pt));letter-spacing:.08em}
+  .screen[data-step="drop"] .drag{opacity:1;transform:translate(-50%,-46%) scale(.82)}
 
   .controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:20px}
   .chipbtn{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
@@ -189,7 +252,7 @@
   .chipbtn[aria-pressed="true"]{color:#06060A;border-color:transparent;
     background:linear-gradient(100deg,var(--ion),var(--violet))}
   .demo-note{font-family:var(--mono);font-size:11.5px;color:var(--mute);text-align:center;
-    margin-top:14px;letter-spacing:.04em}
+    margin-top:14px;letter-spacing:.04em;line-height:1.7}
 
   /* ── Apoyo ── */
   .support{border:1px solid var(--line);border-radius:18px;padding:32px 28px;background:var(--ink-2);
@@ -276,79 +339,106 @@
         <div class="island" id="island" data-state="idle">
           <div class="ambient"></div>
 
-          <!-- Replegada: carátula y pulso de lo que suena. -->
+          <!-- .peek — lo que flanquea el notch mientras suena algo. -->
           <div class="pane p-idle">
             <div class="art"></div>
-            <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+            <div class="eq" aria-hidden="true"><i></i><i></i><i></i></div>
           </div>
 
-          <!-- Desplegada: la banda modular real. -->
+          <!-- .expanded — NotchBoardView: pestañas + banda modular. -->
           <div class="pane p-open">
-            <div class="bar">
-              <span class="tab on">✈ Flit</span>
-              <span class="tab">Bandeja</span>
-              <span class="tools">≡ ⚙</span>
-            </div>
-            <div class="band">
-              <div class="mod player">
-                <div class="cover"></div>
-                <div class="track">
-                  <b>Good Reason</b>
-                  <span>Gracie Abrams</span>
-                  <div class="scrub"><i></i></div>
-                  <div class="times"><span>0:45</span><span>-3:24</span></div>
-                </div>
-                <div class="transport">⏮ <b>⏸</b> ⏭</div>
+            <div class="board">
+              <div class="tabs">
+                <span class="tab on"><span class="sym">▬</span>Flit</span>
+                <span class="tab"><span class="sym">▤</span>Bandeja</span>
+                <span class="tools"><span>≡</span><span>⚙</span></span>
               </div>
-
-              <div class="mod context" id="context">
-                <div class="appname"><span class="dot"></span><span id="appname">TERMINAL</span></div>
-                <div class="acts" id="acts">
-                  <span class="act">⑂ Rama</span>
-                  <span class="act">{} Enviar</span>
+              <div class="band">
+                <!-- media · 3 unidades = 264 pt -->
+                <div class="mod media u3">
+                  <div class="cover"></div>
+                  <div class="track">
+                    <div>
+                      <b>Good Reason</b>
+                      <em>Gracie Abrams</em>
+                    </div>
+                    <div class="scrub">
+                      <div class="rail"><i></i></div>
+                      <div class="times"><span>0:45</span><span>-3:24</span></div>
+                    </div>
+                  </div>
+                  <div class="transport">❚❚</div>
+                </div>
+                <!-- context · 2 unidades = 176 pt -->
+                <div class="mod ctx u2" id="context">
+                  <div class="ctxname"><span class="dot"></span><span id="appname">TERMINAL</span></div>
+                  <div class="ctxacts" id="acts">
+                    <span class="act"><span class="sym">⑂</span>main</span>
+                    <span class="act"><span class="sym">↑</span>Push</span>
+                  </div>
+                </div>
+                <!-- weather · 1 unidad = 88 pt -->
+                <div class="mod tile u1">
+                  <div class="val"><span>☀</span>24°</div>
+                  <div class="cap">Clima</div>
                 </div>
               </div>
-
-              <div class="mod tile"><em>Clima</em><strong>24°</strong></div>
-              <div class="mod tile"><em>Batería</em><strong>92%</strong></div>
             </div>
           </div>
 
-          <!-- Arrastre: los destinos del portal. -->
+          <!-- .portal — los cinco destinos de NotchDestination. -->
           <div class="pane p-drop">
-            <div class="target hot"><i>↓</i>Guardar</div>
-            <div class="target"><i>◈</i>AirDrop</div>
-            <div class="target"><i>▦</i>QR</div>
-            <div class="target"><i>◫</i>Texto</div>
+            <div class="hint"><span>⊕</span><span>Suelta donde quieras enviarlo</span></div>
+            <div class="dests" id="dests">
+              <div class="dest"><div class="ring">▭</div><div class="lbl">iPhone</div></div>
+              <div class="dest"><div class="ring">⧉</div><div class="lbl">Copiar</div></div>
+              <div class="dest"><div class="ring">▤</div><div class="lbl">Repisa</div></div>
+              <div class="dest"><div class="ring">▦</div><div class="lbl">QR</div></div>
+              <div class="dest"><div class="ring">◈</div><div class="lbl">AirDrop</div></div>
+            </div>
           </div>
 
-          <!-- Personalizar: mover módulos y guardar preajustes. -->
+          <!-- LayoutStore.isEditing — módulos con flechas y paleta debajo. -->
           <div class="pane p-edit">
-            <div class="bar">
-              <span class="tab on">Personalizar</span>
-              <span class="presets"><b>Trabajo</b><span>Música</span><span>Mínimo</span></span>
-              <span class="tools">⚙</span>
-            </div>
-            <div class="band" id="slots">
-              <span class="slot"><span class="arrows">‹ ›</span>Reproductor</span>
-              <span class="slot"><span class="arrows">‹ ›</span>Portapapeles</span>
-              <span class="slot"><span class="arrows">‹ ›</span>Contexto</span>
-              <span class="slot"><span class="arrows">‹ ›</span>Clima</span>
-              <span class="slot"><span class="arrows">‹ ›</span>Batería</span>
-              <span class="slot"><span class="arrows">‹ ›</span>Dictado</span>
-              <span class="slot"><span class="arrows">‹ ›</span>Volumen</span>
+            <div class="board">
+              <div class="tabs">
+                <span class="tab on"><span class="sym">▬</span>Flit</span>
+                <span class="tab"><span class="sym">▤</span>Bandeja</span>
+                <span class="tools"><span style="color:#00F0FF">✓</span><span>⚙</span></span>
+              </div>
+              <div class="band">
+                <div class="modwrap u3"><div class="mod media" style="flex:1"><div class="cover"></div>
+                  <div class="track"><div><b>Reproductor</b><em>3 unidades</em></div></div></div>
+                  <div class="arrows">‹ ›</div></div>
+                <div class="modwrap u2"><div class="mod ctx" style="flex:1">
+                  <div class="ctxname"><span class="dot"></span><span>CONTEXTO</span></div></div>
+                  <div class="arrows">‹ ›</div></div>
+                <div class="modwrap u1"><div class="mod tile" style="flex:1">
+                  <div class="val">24°</div><div class="cap">Clima</div></div>
+                  <div class="arrows">‹ ›</div></div>
+              </div>
+              <div class="palette" id="palette">
+                <span class="pill">Portapapeles</span>
+                <span class="pill">Batería</span>
+                <span class="pill">Reloj</span>
+                <span class="pill">Calendario</span>
+                <span class="pill">Acciones</span>
+                <span class="pill">Dictado</span>
+                <span class="pill">Volumen</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="controls" role="group" aria-label="Estados del demo">
-        <button class="chipbtn" data-go="idle" aria-pressed="true">Sonando</button>
-        <button class="chipbtn" data-go="open" aria-pressed="false">Al acercarte</button>
-        <button class="chipbtn" data-go="drop" aria-pressed="false">Al arrastrar</button>
-        <button class="chipbtn" data-go="edit" aria-pressed="false">Personalizar</button>
+      <div class="controls" role="group" aria-label="Estados del panel">
+        <button class="chipbtn" data-go="idle" aria-pressed="true">Replegada</button>
+        <button class="chipbtn" data-go="open" aria-pressed="false">Desplegada</button>
+        <button class="chipbtn" data-go="drop" aria-pressed="false">Arrastrando</button>
+        <button class="chipbtn" data-go="edit" aria-pressed="false">Editando</button>
       </div>
-      <p class="demo-note">No es un vídeo: es la isla, con los colores, las medidas y el muelle de la app.</p>
+      <p class="demo-note">Port directo del panel en SwiftUI: 580 × 165 pt, banda de 74,<br>
+        módulos repartidos 3 : 2 : 1 y el muelle response .22 / damping .75.</p>
     </div>
   </div>
 </header>
@@ -524,17 +614,17 @@
   const screen = document.getElementById('screen');
   const buttons = [...document.querySelectorAll('[data-go]')];
   const loop = ['idle', 'open', 'drop', 'open', 'edit'];
-  const hold = { idle: 2200, open: 4200, drop: 2800, edit: 4200 };
+  const hold = { idle: 2400, open: 4600, drop: 3400, edit: 4400 };
   let step = 0, timer = null, manual = false;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // El módulo de contexto es la función que menos se entiende leyéndola y la
-  // que más se entiende viéndola, así que el demo la cicla por su cuenta.
+  // AppContextMonitor: el panel cambia con la app en primer plano. Es la
+  // función que peor se entiende leyéndola y mejor viéndola, así que cicla.
   const apps = [
-    { name: 'TERMINAL', tint: '#32D74B', acts: ['\u2442 Rama', '{} Enviar'] },
-    { name: 'TEAMS',    tint: '#7000FF', acts: ['Silenciar', 'Salir'] },
-    { name: 'CHROME',   tint: '#00F0FF', acts: ['Enviar pestaña', 'Leer'] },
-    { name: 'FIGMA',    tint: '#F0625A', acts: ['Copiar enlace', 'Compartir'] },
+    { name: 'TERMINAL', tint: '#32D74B', acts: [['⑂','main'], ['↑','Push']] },
+    { name: 'EN REUNIÓN', tint: '#7000FF', acts: [['◉','Silenciar'], ['⊗','Salir']] },
+    { name: 'CHROME', tint: '#4FD1C5', acts: [['⇪','Enviar'], ['◫','Leer']] },
+    { name: 'FIGMA', tint: '#FFB86B', acts: [['⧉','Enlace'], ['◈','Compartir']] },
   ];
   let appIndex = 0;
   const context = document.getElementById('context');
@@ -545,28 +635,44 @@
     const app = apps[appIndex = (appIndex + 1) % apps.length];
     context.style.setProperty('--app-tint', app.tint);
     appName.textContent = app.name;
-    acts.innerHTML = app.acts.map(a => `<span class="act">${a}</span>`).join('');
+    acts.innerHTML = app.acts
+      .map(([sym, label]) => `<span class="act"><span class="sym">${sym}</span>${label}</span>`)
+      .join('');
   }
 
-  // Y en "Personalizar", un módulo cambia de sitio solo: el gesto que la
-  // palabra "reordenable" no transmite.
-  const slots = document.getElementById('slots');
-  function shuffleSlot() {
-    const items = [...slots.children];
-    const moving = items[2];
-    moving.classList.add('moving');
+  // hoveredDestination: el destino bajo el cursor se enciende y los demás se
+  // apagan. Aquí se recorre solo para enseñar el gesto completo.
+  const dests = [...document.querySelectorAll('#dests .dest')];
+  let hover = 0, hoverTimer = null;
+  function sweep() {
+    dests.forEach((d, i) => {
+      d.classList.toggle('hot', i === hover);
+      d.classList.toggle('dim', i !== hover);
+    });
+    hover = (hover + 1) % dests.length;
+  }
+
+  // LayoutStore.shift: un módulo de la paleta entra en la banda.
+  const palette = document.getElementById('palette');
+  function movePill() {
+    const pill = palette.children[1];
+    pill.classList.add('moving');
     setTimeout(() => {
-      slots.insertBefore(moving, items[0]);
-      setTimeout(() => moving.classList.remove('moving'), 420);
-    }, 380);
+      palette.insertBefore(pill, palette.firstChild);
+      setTimeout(() => pill.classList.remove('moving'), 420);
+    }, 420);
   }
 
   function paint(state) {
     island.dataset.state = state;
     screen.dataset.step = state;
     buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.go === state)));
+
+    clearInterval(hoverTimer);
     if (state === 'open') nextApp();
-    if (state === 'edit') shuffleSlot();
+    if (state === 'edit') movePill();
+    if (state === 'drop') { hover = 0; sweep(); hoverTimer = setInterval(sweep, 800); }
+    else dests.forEach(d => d.classList.remove('hot', 'dim'));
   }
 
   function tick() {
@@ -581,10 +687,11 @@
       manual = true;
       clearTimeout(timer);
       paint(button.dataset.go);
-      setTimeout(() => { manual = false; tick(); }, 7000);
+      setTimeout(() => { manual = false; tick(); }, 8000);
     });
   });
 
+  // setHovering: acercarse despliega, igual que en la app.
   island.addEventListener('mouseenter', () => {
     if (island.dataset.state !== 'idle') return;
     manual = true; clearTimeout(timer); paint('open');
