@@ -164,6 +164,10 @@
   .chip{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
     color:var(--ion);display:block;margin-bottom:12px}
 
+  .notice{border:1px solid rgba(0,240,255,.28);background:rgba(0,240,255,.05);border-radius:14px;
+    padding:18px 20px;font-size:14.5px;color:var(--mute);line-height:1.6;max-width:62ch}
+  .notice b{color:var(--paper);display:block;margin-bottom:5px}
+
   .tiers{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(278px,1fr));align-items:stretch}
   .tier{background:var(--ink-2);border:1px solid var(--line);border-radius:18px;padding:30px 26px;
     display:flex;flex-direction:column;gap:18px}
@@ -216,7 +220,7 @@
       <a class="btn btn-primary" href="https://github.com/dxni087/flit-releases/releases/latest">Descargar para macOS</a>
       <a class="btn btn-ghost" href="#precios">Ver precios</a>
     </div>
-    <p class="fineprint">macOS 15 o superior · Apple Silicon e Intel</p>
+    <p class="fineprint">macOS 15 o superior · Apple Silicon e Intel · Reserva con devolución garantizada</p>
 
     <div class="demo">
       <div class="screen" id="screen" data-step="idle">
@@ -322,6 +326,15 @@
       <span class="eyebrow">Precio</span>
       <h2>Se paga una vez</h2>
       <p class="lede">Sin suscripción para lo que vive en tu Mac. Compras la versión, la actualizas siempre y sigue funcionando aunque nunca vuelvas a pagar.</p>
+
+      <div class="notice">
+        <b>Flit está en reserva, no en venta todavía.</b>
+        La app funciona —el demo de arriba es real— pero distribuirla fuera de la
+        App Store exige la firma de desarrollador de Apple, que cuesta 99 USD al
+        año. Las reservas de Fundador pagan justo eso. Al alcanzarla se publica
+        la versión 1.0 firmada y cada reserva recibe su clave el mismo día;
+        si no se alcanza en 60 días, se devuelve el dinero íntegro.
+      </div>
     </div>
 
     <div class="tiers">
@@ -344,7 +357,7 @@
         <div>
           <span class="was">19 USD</span>
           <div class="price">9<small>USD · pago único</small></div>
-          <div class="fineprint" style="margin-top:8px">Precio de lanzamiento · 30 días</div>
+          <div class="fineprint" style="margin-top:8px">Fundador · antes del lanzamiento</div>
         </div>
         <ul>
           <li>Todo lo de Gratis, sin límites</li>
@@ -353,22 +366,22 @@
           <li>Gestos de volumen y brillo</li>
           <li>OCR, dictado y transferencia por QR</li>
           <li>2 Macs · actualizaciones de por vida</li>
+          <li>Flit Sync incluido cuando llegue, sin cuota</li>
         </ul>
-        <a class="btn btn-primary" href="https://dxni087.lemonsqueezy.com/checkout">Comprar Flit Pro</a>
+        <a class="btn btn-primary" href="#" data-checkout>Apoyar y reservar — 9 USD</a>
       </div>
 
       <div class="tier">
         <div>
-          <div class="price">2,49<small>USD / mes</small></div>
-          <div class="fineprint" style="margin-top:8px">Complemento opcional</div>
+          <div class="price">19<small>USD · pago único</small></div>
+          <div class="fineprint" style="margin-top:8px">Precio normal, al lanzar</div>
         </div>
         <ul>
-          <li>Flit Sync: lo que sueltas en el notch aparece en tu iPhone</li>
-          <li>Isla dinámica y Live Activity en el móvil</li>
-          <li>StandBy en la mesita</li>
-          <li>Se cancela sin perder Flit Pro</li>
+          <li>Exactamente lo mismo que Fundador</li>
+          <li class="off">Sin Flit Sync incluido</li>
+          <li class="off">Sin el descuento de reserva</li>
         </ul>
-        <span class="btn btn-ghost" style="opacity:.6;cursor:default">Próximamente</span>
+        <span class="btn btn-ghost" style="opacity:.6;cursor:default">Disponible al lanzar</span>
       </div>
     </div>
   </div>
