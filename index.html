@@ -93,7 +93,7 @@
     transition:width .42s var(--spring),height .42s var(--spring),border-radius .42s ease}
   .island[data-state="open"]{width:calc(580 * var(--pt));height:calc(165 * var(--pt));
     border-radius:0 0 calc(26 * var(--pt)) calc(26 * var(--pt))}
-  .island[data-state="drop"]{width:calc(520 * var(--pt));height:calc(155 * var(--pt));
+  .island[data-state="drop"]{width:calc(470 * var(--pt));height:calc(155 * var(--pt));
     border-radius:0 0 calc(26 * var(--pt)) calc(26 * var(--pt))}
   .island[data-state="edit"]{width:calc(580 * var(--pt));height:calc(209 * var(--pt));
     border-radius:0 0 calc(26 * var(--pt)) calc(26 * var(--pt))}
@@ -347,8 +347,10 @@
   .trayrow .t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff}
   .trayrow .a{font:600 calc(10 * var(--pt))/1 ui-rounded,var(--body);color:var(--k-tint);
     white-space:nowrap;cursor:pointer}
-  .trayempty{font:500 calc(11 * var(--pt))/1.4 var(--body);color:rgba(255,255,255,.35);
-    text-align:center;padding-top:calc(16 * var(--pt))}
+  .sent{font:600 calc(11 * var(--pt))/1 ui-rounded,var(--body);color:rgba(255,255,255,.45);
+    text-align:center}
+  .sent b{color:var(--ion)}
+  .p-tray{justify-content:center;padding-top:calc(46 * var(--pt))}
 
   /* El marcado de los paneles nuevos reutiliza la fila de pestañas. */
   .bar{display:flex;align-items:center;gap:calc(6 * var(--pt))}
@@ -464,8 +466,7 @@
           <div class="pane p-open">
             <div class="board">
               <div class="tabs">
-                <span class="tab on" data-tab="flit"><span class="sym">▬</span>Flit</span>
-                <span class="tab" data-tab="tray"><span class="sym">▤</span>Bandeja</span>
+                <span class="tab" style="cursor:default;opacity:.5"><span class="sym">▬</span>Flit</span>
                 <span class="tools"><span data-tool="edit">≡</span><span>⚙</span></span>
               </div>
               <div class="band">
@@ -517,25 +518,19 @@
             <span class="num" id="volnum">54%</span>
           </div>
 
-          <!-- Bandeja: lo que el visitante haya soltado. -->
+          <!-- Acuse del envío: a dónde fue lo que soltaste. Sustituye a la
+               Bandeja, que era un cajón que había que ir a vaciar a mano. -->
           <div class="pane p-tray">
-            <div class="bar">
-              <span class="tab" data-tab="flit"><span class="sym">▬</span>Flit</span>
-              <span class="tab on" data-tab="tray"><span class="sym">▤</span>Bandeja</span>
-              <span class="tools"><span data-tool="edit">≡</span><span>⚙</span></span>
-            </div>
-            <div id="traylist" style="display:flex;flex-direction:column;gap:calc(6 * var(--pt))">
-              <div class="trayempty">Arrastra una de las tarjetas de abajo hasta el notch.</div>
-            </div>
+            <div id="traylist" style="display:flex;flex-direction:column;gap:calc(8 * var(--pt))"></div>
           </div>
 
           <!-- .portal — los cinco destinos de NotchDestination. -->
           <div class="pane p-drop">
             <div class="hint"><span>⊕</span><span>Suelta donde quieras enviarlo</span></div>
+            <!-- Los cuatro destinos que ENVÍAN a algún sitio. -->
             <div class="dests" id="dests">
               <div class="dest"><div class="ring">▭</div><div class="lbl">iPhone</div></div>
               <div class="dest"><div class="ring">⧉</div><div class="lbl">Copiar</div></div>
-              <div class="dest"><div class="ring">▤</div><div class="lbl">Repisa</div></div>
               <div class="dest"><div class="ring">▦</div><div class="lbl">QR</div></div>
               <div class="dest"><div class="ring">◈</div><div class="lbl">AirDrop</div></div>
             </div>
@@ -590,7 +585,7 @@
 
       <div class="tips">
         <span><b>Acércate</b> al notch para desplegarlo</span>
-        <span><b>Arrastra</b> una tarjeta encima</span>
+        <span><b>Arrastra</b> una tarjeta a un destino</span>
         <span><b>Rueda</b> sobre él para el volumen</span>
         <span><b>Pulsa</b> ❚❚ o la barra de tiempo</span>
         <span><b>≡</b> para reordenar módulos</span>
@@ -834,21 +829,21 @@
     renderEdit();
   }
 
+  // Acuse del envío. No es un cajón que se acumula: dice a dónde fue lo que
+  // soltaste, deja hacer la acción y se retira. La Repisa se quitó justo por
+  // eso — guardar dentro del notch obligaba a ir a vaciarlo a mano.
   function renderTray() {
     const list = $('traylist');
-    if (!st.tray.length) {
-      list.innerHTML = '<div class="trayempty">Arrastra una de las tarjetas de abajo hasta el notch.</div>';
-      return;
-    }
-    // Los más recientes arriba, como en la bandeja real.
-    list.innerHTML = st.tray.slice(0, 3).map((it, i) => {
-      const k = KINDS[it.kind];
-      return `<div class="trayrow" style="--k-tint:${k.tint}">
+    const it = st.tray[0];
+    if (!it) { list.innerHTML = ''; return; }
+    const k = KINDS[it.kind];
+    list.innerHTML = `
+      <div class="sent">Enviado a <b>${it.where}</b></div>
+      <div class="trayrow" style="--k-tint:${k.tint}">
         <span class="g">${k.sym}</span>
         <span class="t">${it.title}</span>
-        <span class="a" data-copy="${i}">${it.done ? '✓ Hecho' : k.act}</span>
+        <span class="a" data-copy="0">${it.done ? '✓ Hecho' : k.act}</span>
       </div>`;
-    }).join('');
   }
 
   function renderEdit() {
@@ -974,7 +969,7 @@
   window.addEventListener('pointerup', () => { scrubbing = false; });
 
   // ── Rueda sobre el notch: volumen ────────────────────────────────────
-  let volTimer = null;
+  let volTimer = null, sentTimer = null;
   island.addEventListener('wheel', (e) => {
     e.preventDefault();
     st.volume = Math.min(100, Math.max(0, st.volume - Math.sign(e.deltaY) * 4));
@@ -1029,6 +1024,11 @@
 
     st.tray.unshift({ kind: payload.kind, title: payload.title, where });
     st.dragging = false;
+    // El acuse se retira solo: es una confirmación, no una lista.
+    clearTimeout(sentTimer);
+    sentTimer = setTimeout(() => {
+      if (st.mode === 'tray') { st.mode = st.hovering ? 'open' : 'idle'; render(); }
+    }, 3200);
     island.classList.remove('armed');
     document.querySelectorAll('.dest').forEach(d => d.classList.remove('hot', 'dim'));
 
