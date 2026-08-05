@@ -106,7 +106,11 @@
     filter:blur(calc(42 * var(--pt))) saturate(2.2);
     -webkit-mask-image:radial-gradient(closest-side,transparent 11%,#000 58%);
     mask-image:radial-gradient(closest-side,transparent 11%,#000 58%)}
-  .island{--art-a:#E0574F;--art-b:#7000FF}
+  /* Los dos dominantes REALES de la carátula que sonaba al construir esto
+     —"Hit the Wall", Gracie Abrams—, extraídos igual que `ambientTint`:
+     píxeles agrupados en cubos, descartando grises, y ganan los más poblados.
+     No es un degradado elegido a ojo; es la luz que esa portada derrama. */
+  .island{--art-a:#A76954;--art-b:#7F4A3D}
   .island[data-state="open"] .ambient,.island[data-state="edit"] .ambient{opacity:.34}
 
   .pane{position:absolute;inset:0;z-index:4;transition:opacity .18s ease;opacity:0;pointer-events:none}
@@ -120,7 +124,8 @@
     padding:0 calc(9 * var(--pt))}
   .art{width:calc(20 * var(--pt));height:calc(20 * var(--pt));
     border-radius:calc(5 * var(--pt));flex:none;
-    background:linear-gradient(140deg,var(--art-a),var(--art-b))}
+    background:radial-gradient(circle at 32% 28%,#C98268,transparent 60%),
+               linear-gradient(150deg,var(--art-a),#461812 70%)}
   .eq{display:flex;align-items:center;gap:calc(2.5 * var(--pt));height:calc(16 * var(--pt))}
   .eq i{display:block;width:calc(2.5 * var(--pt));border-radius:99px;
     background:linear-gradient(180deg,var(--ion),var(--violet));
@@ -156,9 +161,13 @@
 
   /* MediaModule: HStack(spacing: 11), carátula 52 r11. */
   .media{gap:calc(11 * var(--pt))}
+  /* La carátula no se incrusta: usar una portada real en una página de venta
+     es un problema de licencia, no de diseño. Se reconstruye con SUS colores
+     dominantes y el mismo relieve que le da la app. */
   .cover{width:calc(52 * var(--pt));height:calc(52 * var(--pt));flex:none;
-    border-radius:calc(11 * var(--pt));position:relative;
-    background:linear-gradient(140deg,var(--art-a),var(--art-b));
+    border-radius:calc(11 * var(--pt));position:relative;overflow:hidden;
+    background:radial-gradient(circle at 32% 28%,#C98268,transparent 58%),
+               linear-gradient(150deg,var(--art-a),#461812 70%);
     box-shadow:0 calc(2 * var(--pt)) calc(7 * var(--pt)) rgba(0,0,0,.5)}
   .track{min-width:0;flex:1;display:flex;flex-direction:column;gap:calc(4 * var(--pt))}
   .track b{display:block;font:600 calc(13 * var(--pt))/1.15 var(--body);color:#fff;
@@ -168,9 +177,10 @@
   /* Scrubber: VStack(spacing: 3), pista alto 3, etiquetas 9 semibold redondeadas. */
   .scrub{display:flex;flex-direction:column;gap:calc(3 * var(--pt))}
   .scrub .rail{height:calc(3 * var(--pt));border-radius:99px;background:rgba(255,255,255,.15);overflow:hidden}
-  .scrub .rail i{display:block;height:100%;border-radius:99px;width:22%;
-    background:var(--art-a);animation:seek 24s linear infinite}
-  @keyframes seek{from{width:6%}to{width:97%}}
+  .scrub .rail i{display:block;height:100%;border-radius:99px;
+    background:var(--art-a);animation:seek 23s linear infinite}
+  /* Arranca en el 88 %: el segundo exacto en que estaba la canción. */
+  @keyframes seek{from{width:88%}to{width:100%}}
   .scrub .times{display:flex;justify-content:space-between;
     font:500 calc(9 * var(--pt))/1 ui-rounded,var(--mono);color:rgba(255,255,255,.45);
     font-variant-numeric:tabular-nums}
@@ -359,12 +369,12 @@
                   <div class="cover"></div>
                   <div class="track">
                     <div>
-                      <b>Good Reason</b>
-                      <em>Gracie Abrams</em>
+                      <b>Hit the Wall</b>
+                      <em>Gracie Abrams · Spotify</em>
                     </div>
                     <div class="scrub">
                       <div class="rail"><i></i></div>
-                      <div class="times"><span>0:45</span><span>-3:24</span></div>
+                      <div class="times"><span>2:51</span><span>-0:23</span></div>
                     </div>
                   </div>
                   <div class="transport">❚❚</div>
@@ -379,8 +389,8 @@
                 </div>
                 <!-- weather · 1 unidad = 88 pt -->
                 <div class="mod tile u1">
-                  <div class="val"><span>☀</span>24°</div>
-                  <div class="cap">Clima</div>
+                  <div class="val"><span>☀</span>32°</div>
+                  <div class="cap">Cd. Juárez</div>
                 </div>
               </div>
             </div>
@@ -437,8 +447,8 @@
         <button class="chipbtn" data-go="drop" aria-pressed="false">Arrastrando</button>
         <button class="chipbtn" data-go="edit" aria-pressed="false">Editando</button>
       </div>
-      <p class="demo-note">Port directo del panel en SwiftUI: 580 × 165 pt, banda de 74,<br>
-        módulos repartidos 3 : 2 : 1 y el muelle response .22 / damping .75.</p>
+      <p class="demo-note">Port directo del panel en SwiftUI: 580 × 165 pt, banda de 74 y el muelle response .22 / damping .75.<br>
+        Los datos son los de un Mac real: Spotify en el minuto 2:51, Terminal al frente, 32° en Ciudad Juárez.</p>
     </div>
   </div>
 </header>
@@ -622,9 +632,9 @@
   // función que peor se entiende leyéndola y mejor viéndola, así que cicla.
   const apps = [
     { name: 'TERMINAL', tint: '#32D74B', acts: [['⑂','main'], ['↑','Push']] },
+    { name: 'SPOTIFY', tint: '#32D74B', acts: [['♥','Guardar'], ['⧉','Enlace']] },
     { name: 'EN REUNIÓN', tint: '#7000FF', acts: [['◉','Silenciar'], ['⊗','Salir']] },
     { name: 'CHROME', tint: '#4FD1C5', acts: [['⇪','Enviar'], ['◫','Leer']] },
-    { name: 'FIGMA', tint: '#FFB86B', acts: [['⧉','Enlace'], ['◈','Compartir']] },
   ];
   let appIndex = 0;
   const context = document.getElementById('context');
