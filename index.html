@@ -379,6 +379,28 @@
     font-family:var(--mono);font-size:11px;color:var(--mute);letter-spacing:.03em}
   .tips b{color:var(--paper);font-weight:600}
 
+
+  /* ── Instalación ── */
+  .ways{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));align-items:stretch}
+  .way{background:var(--ink-2);border:1px solid var(--line);border-radius:16px;padding:24px 22px;
+    display:flex;flex-direction:column;gap:12px}
+  .way.first{border-color:rgba(0,240,255,.42);position:relative;
+    background:linear-gradient(180deg,rgba(0,240,255,.06),transparent),var(--ink-2)}
+  .way.first::after{content:"Recomendada";position:absolute;top:-11px;left:22px;font-family:var(--mono);
+    font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#06060A;padding:4px 11px;
+    border-radius:99px;background:linear-gradient(100deg,var(--ion),var(--violet))}
+  .way h3{font-size:17px}
+  .way p{color:var(--mute);font-size:13.5px;margin:0;flex:1}
+  .cmd{display:flex;align-items:center;gap:10px;background:#08080B;border:1px solid var(--line);
+    border-radius:10px;padding:12px 14px;font-family:var(--mono);font-size:12px;overflow-x:auto}
+  .cmd code{white-space:nowrap;color:var(--paper)}
+  .cmd button{flex:none;margin-left:auto;font-family:var(--body);font-size:11px;font-weight:600;
+    background:rgba(255,255,255,.08);color:var(--paper);border:none;border-radius:7px;
+    padding:6px 11px;cursor:pointer;transition:.15s ease}
+  .cmd button:hover{background:rgba(0,240,255,.22)}
+  .warn{font-size:12.5px;color:var(--mute);line-height:1.55}
+  .warn b{color:#FFB86B}
+
   section{padding:104px 0}
   .head{display:flex;flex-direction:column;gap:18px;margin-bottom:50px;max-width:62ch}
   .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(268px,1fr))}
@@ -442,10 +464,10 @@
     <p class="lede">Flit convierte la muesca del MacBook en un panel vivo: lo que suena, tu portapapeles, el clima y lo siguiente en tu agenda. Un gesto y está ahí.</p>
 
     <div class="cta">
-      <a class="btn btn-primary" href="https://buy.stripe.com/cNi6oG6Vc4P80PF3iKcMM00">Reservar por 9 USD</a>
-      <a class="btn btn-ghost" href="#precios">Cómo funciona la reserva</a>
+      <a class="btn btn-primary" href="#instalar">Descargar gratis</a>
+      <a class="btn btn-ghost" href="#precios">Ver Flit Pro — 9 USD</a>
     </div>
-    <p class="fineprint">macOS 15 o superior · Apple Silicon e Intel · Devolución íntegra si no se publica</p>
+    <p class="fineprint">Versión 1.0 · macOS 15 o superior · Apple Silicon e Intel · 3,6 MB</p>
 
     <div class="demo">
       <div class="screen" id="screen" data-step="idle">
@@ -654,6 +676,43 @@
   </div>
 </section>
 
+
+<section id="instalar">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow">Instalar</span>
+      <h2>Tres formas, un minuto</h2>
+      <p class="lede">Flit está firmada con certificado de desarrollador. La notarización de Apple llega con la siguiente versión, y eso cambia solo la forma de instalar — no cómo funciona la app.</p>
+    </div>
+
+    <div class="ways">
+      <div class="way first">
+        <h3>Una línea en la Terminal</h3>
+        <p>Descarga, comprueba la suma SHA-256 y la deja en Aplicaciones. Abre a la primera, sin avisos: lo que baja <code>curl</code> no lleva la marca de cuarentena que activa Gatekeeper.</p>
+        <div class="cmd">
+          <code id="c1">curl -fsSL https://flit.up.railway.app/install | bash</code>
+          <button data-copy="c1">Copiar</button>
+        </div>
+      </div>
+
+      <div class="way">
+        <h3>Homebrew</h3>
+        <p>Si ya usas Homebrew. Hace falta <code>--no-quarantine</code>: brew marca las descargas y con esa marca macOS bloquea lo que aún no está notarizado.</p>
+        <div class="cmd">
+          <code id="c2">brew install --cask dxni087/flit/flit --no-quarantine</code>
+          <button data-copy="c2">Copiar</button>
+        </div>
+      </div>
+
+      <div class="way">
+        <h3>Descarga directa</h3>
+        <p class="warn">El DMG de siempre. <b>Aviso:</b> al abrirlo macOS dirá que no puede comprobar el desarrollador. Ve a Ajustes del Sistema › Privacidad y seguridad › <b>Abrir de todos modos</b>. Las otras dos vías se saltan ese paso.</p>
+        <a class="btn btn-ghost" href="https://github.com/dxni087/flit-releases/releases/latest">Descargar el DMG</a>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="precios" style="background:linear-gradient(180deg,transparent,rgba(112,0,255,.05),transparent)">
   <div class="wrap">
     <div class="head">
@@ -662,12 +721,9 @@
       <p class="lede">Sin suscripción para lo que vive en tu Mac. Compras la versión, la actualizas siempre y sigue funcionando aunque nunca vuelvas a pagar.</p>
 
       <div class="notice">
-        <b>Flit está en reserva, no en venta todavía.</b>
-        La app funciona —el demo de arriba es real— pero distribuirla fuera de la
-        App Store exige la firma de desarrollador de Apple, que cuesta 99 USD al
-        año. Las reservas de Fundador pagan justo eso. Al alcanzarla se publica
-        la versión 1.0 firmada y cada reserva recibe su clave el mismo día;
-        si no se alcanza en 60 días, se devuelve el dinero íntegro.
+        <b>Flit 1.0 ya está disponible.</b>
+        La versión gratuita funciona para siempre y sin límite de tiempo. Pro se
+        paga una vez, vale para dos Macs e incluye todas las versiones futuras.
       </div>
     </div>
 
@@ -684,14 +740,14 @@
           <li class="off">Módulos personalizables</li>
           <li class="off">Gestos, OCR y dictado</li>
         </ul>
-        <span class="btn btn-ghost" style="opacity:.6;cursor:default">Al publicar la 1.0</span>
+        <a class="btn btn-ghost" href="#instalar">Instalar ahora</a>
       </div>
 
       <div class="tier best">
         <div>
           <span class="was">19 USD</span>
           <div class="price">9<small>USD · pago único</small></div>
-          <div class="fineprint" style="margin-top:8px">Fundador · antes del lanzamiento</div>
+          <div class="fineprint" style="margin-top:8px">Precio de lanzamiento · primeros 30 días</div>
         </div>
         <ul>
           <li>Todo lo de Gratis, sin límites</li>
@@ -701,8 +757,9 @@
           <li>OCR, dictado y transferencia por QR</li>
           <li>2 Macs · actualizaciones de por vida</li>
           <li>Flit Sync incluido cuando llegue, sin cuota</li>
+          <li>Actualizaciones automáticas firmadas</li>
         </ul>
-        <a class="btn btn-primary" href="https://buy.stripe.com/cNi6oG6Vc4P80PF3iKcMM00">Apoyar y reservar — 9 USD</a>
+        <a class="btn btn-primary" href="https://buy.stripe.com/cNi6oG6Vc4P80PF3iKcMM00">Comprar Flit Pro — 9 USD</a>
       </div>
 
       <div class="tier">
@@ -711,18 +768,18 @@
           <div class="fineprint" style="margin-top:8px">Precio normal, al lanzar</div>
         </div>
         <ul>
-          <li>Exactamente lo mismo que Fundador</li>
+          <li>Exactamente lo mismo que Pro</li>
           <li class="off">Sin Flit Sync incluido</li>
-          <li class="off">Sin el descuento de reserva</li>
+          <li class="off">Sin el descuento de lanzamiento</li>
         </ul>
-        <span class="btn btn-ghost" style="opacity:.6;cursor:default">Disponible al lanzar</span>
+        <span class="btn btn-ghost" style="opacity:.6;cursor:default">A partir del día 31</span>
       </div>
     </div>
 
     <div class="support">
       <div>
         <h3>¿Prefieres solo echar una mano?</h3>
-        <p>Una aportación libre, sin licencia ni compromiso. Va entera a la firma de desarrollador y al tiempo de desarrollo. Desde 2 USD.</p>
+        <p>Una aportación libre, sin licencia ni compromiso. Va entera a la notarización de Apple y al tiempo de desarrollo. Desde 2 USD.</p>
       </div>
       <a class="btn btn-ghost" href="https://buy.stripe.com/7sY00idjA81kcynbPgcMM01">Aportar lo que quieras</a>
     </div>
