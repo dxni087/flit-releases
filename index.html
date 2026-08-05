@@ -184,11 +184,20 @@
   .scrub .times{display:flex;justify-content:space-between;
     font:500 calc(9 * var(--pt))/1 ui-rounded,var(--mono);color:rgba(255,255,255,.45);
     font-variant-numeric:tabular-nums}
-  /* TransportButton: primario 34 con símbolo 18. `ViewThatFits` deja SOLO el
-     play cuando el módulo mide 264 pt — por eso aquí hay un botón, no tres. */
-  .transport{width:calc(34 * var(--pt));height:calc(34 * var(--pt));flex:none;
-    border-radius:99px;background:rgba(255,255,255,.12);display:grid;place-items:center;
-    font-size:calc(18 * var(--pt));color:#fff}
+  /* TransportButton compacto: al bajar a su propia fila, 24 pt para el play y
+     20 para los otros dos. Así caben los tres siempre, que era el problema de
+     tenerlos a la derecha compitiendo por el ancho con el título. */
+  .tline{display:flex;align-items:center;justify-content:space-between;
+    font:500 calc(9 * var(--pt))/1 ui-rounded,var(--mono);color:rgba(255,255,255,.38);
+    font-variant-numeric:tabular-nums}
+  .tp{display:flex;align-items:center;gap:calc(7 * var(--pt))}
+  .tb{width:calc(20 * var(--pt));height:calc(20 * var(--pt));border-radius:99px;
+    display:grid;place-items:center;font-size:calc(10 * var(--pt));color:#fff;cursor:pointer;
+    background:rgba(255,255,255,.10);transition:transform .12s ease,background .15s ease}
+  .tb.big{width:calc(24 * var(--pt));height:calc(24 * var(--pt));font-size:calc(13 * var(--pt));
+    background:rgba(255,255,255,.14)}
+  .tb:hover{background:rgba(255,255,255,.24)}
+  .tb:active{transform:scale(.88)}
 
   /* ContextModule: VStack(spacing: 7), flitCaption + fila de acciones spacing 6. */
   .ctx{flex-direction:column;align-items:stretch;gap:calc(7 * var(--pt));justify-content:center}
@@ -271,6 +280,82 @@
   .support div{flex:1;min-width:260px}
   .support h3{margin-bottom:8px}
   .support p{color:var(--mute);font-size:15px;margin:0}
+
+
+  /* ── Banco de pruebas ───────────────────────────────────────────────────
+     Todo lo de abajo existe para que el visitante PRUEBE, no para decorar:
+     transporte que responde, barra que se arrastra, rueda de volumen, arrastre
+     real y bandeja que se llena. Un demo que solo se mira no demuestra nada,
+     y menos en una página que pide dinero. */
+
+  /* Barra de tiempo: la zona sensible es más alta que la línea, porque acertar
+     en 3 pt con el ratón es imposible. Es lo mismo que hace la app al pasar el
+     cursor: engorda de 3 a 5. */
+  .scrub .rail{cursor:pointer;position:relative}
+  .scrub .hit{position:absolute;left:0;right:0;top:calc(-7 * var(--pt));
+    height:calc(17 * var(--pt));cursor:pointer}
+  .scrub:hover .rail{height:calc(5 * var(--pt))}
+
+  /* HUD de volumen: sustituye la banda mientras giras la rueda, igual que la
+     app sustituye el OSD gigante del sistema. */
+  .p-vol{display:flex;align-items:center;gap:calc(11 * var(--pt));
+    padding:calc(52 * var(--pt)) calc(20 * var(--pt)) 0}
+  .island[data-state="vol"]{width:calc(420 * var(--pt));height:calc(100 * var(--pt));
+    border-radius:0 0 calc(24 * var(--pt)) calc(24 * var(--pt))}
+  .island[data-state="vol"] .p-vol{opacity:1}
+  .p-vol .sym{font-size:calc(16 * var(--pt));width:calc(24 * var(--pt))}
+  .p-vol .track2{flex:1;height:calc(4 * var(--pt));border-radius:99px;
+    background:rgba(255,255,255,.15);overflow:hidden}
+  .p-vol .track2 i{display:block;height:100%;border-radius:99px;
+    background:linear-gradient(90deg,var(--ion),var(--violet));transition:width .1s linear}
+  .p-vol .num{font:600 calc(15 * var(--pt))/1 ui-rounded,var(--body);
+    font-variant-numeric:tabular-nums;color:#fff;width:calc(46 * var(--pt));text-align:right}
+
+  /* Bandeja: cada fila detecta su tipo y ofrece su acción, como ContentInspector. */
+  .p-tray{padding:calc(46 * var(--pt)) calc(16 * var(--pt)) calc(12 * var(--pt));
+    display:flex;flex-direction:column;gap:calc(8 * var(--pt))}
+  .island[data-state="tray"]{width:calc(580 * var(--pt));height:calc(165 * var(--pt));
+    border-radius:0 0 calc(26 * var(--pt)) calc(26 * var(--pt))}
+  .island[data-state="tray"] .p-tray{opacity:1;pointer-events:auto}
+  .trayrow{display:flex;align-items:center;gap:calc(9 * var(--pt));
+    background:rgba(255,255,255,.06);border:calc(.8 * var(--pt)) solid rgba(255,255,255,.09);
+    border-radius:calc(9 * var(--pt));padding:calc(6 * var(--pt)) calc(9 * var(--pt));
+    font:500 calc(11 * var(--pt))/1.3 var(--body)}
+  .trayrow .g{width:calc(22 * var(--pt));height:calc(22 * var(--pt));flex:none;
+    border-radius:calc(6 * var(--pt));display:grid;place-items:center;
+    font-size:calc(11 * var(--pt));background:var(--k-tint);color:#06060A;font-weight:700}
+  .trayrow .t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff}
+  .trayrow .a{font:600 calc(10 * var(--pt))/1 ui-rounded,var(--body);color:var(--k-tint);
+    white-space:nowrap;cursor:pointer}
+  .trayempty{font:500 calc(11 * var(--pt))/1.4 var(--body);color:rgba(255,255,255,.35);
+    text-align:center;padding-top:calc(16 * var(--pt))}
+
+  /* El marcado de los paneles nuevos reutiliza la fila de pestañas. */
+  .bar{display:flex;align-items:center;gap:calc(6 * var(--pt))}
+
+  .tab{cursor:pointer} .tools span{cursor:pointer} .pill{cursor:pointer} .dest{cursor:copy}
+  .arrows span{cursor:pointer;padding:0 calc(3 * var(--pt))}
+  .arrows span:hover{color:#fff}
+
+  /* Mientras traes algo, todo el notch se ilumina: fallar por un píxel al
+     soltar significaba perder el archivo en el escritorio. */
+  .island.armed{box-shadow:0 0 0 calc(2 * var(--pt)) rgba(0,240,255,.55),
+    0 calc(10 * var(--pt)) calc(30 * var(--pt)) rgba(0,240,255,.25)}
+
+  /* Las tarjetas arrastrables, fuera del notch. */
+  .tryouts{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:22px}
+  .card-drag{display:flex;align-items:center;gap:10px;padding:11px 15px;border-radius:12px;
+    background:var(--ink-2);border:1px solid var(--line);cursor:grab;user-select:none;
+    font-size:13.5px;transition:.16s ease}
+  .card-drag:hover{border-color:rgba(0,240,255,.35);transform:translateY(-1px)}
+  .card-drag:active{cursor:grabbing}
+  .card-drag .g2{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;
+    font-size:12px;font-weight:700;color:#06060A;background:var(--k-tint);flex:none}
+  .card-drag small{display:block;font-family:var(--mono);font-size:10px;color:var(--mute);
+    letter-spacing:.05em}
+  .tips{display:flex;flex-wrap:wrap;gap:7px 18px;justify-content:center;margin-top:18px;
+    font-family:var(--mono);font-size:11px;color:var(--mute);letter-spacing:.03em}
+  .tips b{color:var(--paper);font-weight:600}
 
   section{padding:104px 0}
   .head{display:flex;flex-direction:column;gap:18px;margin-bottom:50px;max-width:62ch}
@@ -359,25 +444,34 @@
           <div class="pane p-open">
             <div class="board">
               <div class="tabs">
-                <span class="tab on"><span class="sym">▬</span>Flit</span>
-                <span class="tab"><span class="sym">▤</span>Bandeja</span>
-                <span class="tools"><span>≡</span><span>⚙</span></span>
+                <span class="tab on" data-tab="flit"><span class="sym">▬</span>Flit</span>
+                <span class="tab" data-tab="tray"><span class="sym">▤</span>Bandeja</span>
+                <span class="tools"><span data-tool="edit">≡</span><span>⚙</span></span>
               </div>
               <div class="band">
                 <!-- media · 3 unidades = 264 pt -->
                 <div class="mod media u3">
-                  <div class="cover"></div>
+                  <div class="cover" id="cover"></div>
                   <div class="track">
                     <div>
                       <b>Hit the Wall</b>
                       <em>Gracie Abrams · Spotify</em>
                     </div>
                     <div class="scrub">
-                      <div class="rail"><i></i></div>
-                      <div class="times"><span>2:51</span><span>-0:23</span></div>
+                      <div class="rail" id="rail"><i id="fill"></i><span class="hit" id="railhit"></span></div>
+                      <!-- Transporte DEBAJO de la barra, flanqueado por las
+                           cifras: la misma disposición que el panel real. -->
+                      <div class="tline">
+                        <span id="elapsed">2:51</span>
+                        <span class="tp">
+                          <span class="tb" data-cmd="prev">⏮</span>
+                          <span class="tb big" id="playbtn" role="button" aria-label="Reproducir o pausar">❚❚</span>
+                          <span class="tb" data-cmd="next">⏭</span>
+                        </span>
+                        <span id="left">-0:23</span>
+                      </div>
                     </div>
                   </div>
-                  <div class="transport">❚❚</div>
                 </div>
                 <!-- context · 2 unidades = 176 pt -->
                 <div class="mod ctx u2" id="context">
@@ -393,6 +487,25 @@
                   <div class="cap">Cd. Juárez</div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- HUD de volumen: aparece al girar la rueda sobre el notch. -->
+          <div class="pane p-vol">
+            <span class="sym" id="volsym">🔊</span>
+            <div class="track2"><i id="volbar" style="width:54%"></i></div>
+            <span class="num" id="volnum">54%</span>
+          </div>
+
+          <!-- Bandeja: lo que el visitante haya soltado. -->
+          <div class="pane p-tray">
+            <div class="bar">
+              <span class="tab" data-tab="flit"><span class="sym">▬</span>Flit</span>
+              <span class="tab on" data-tab="tray"><span class="sym">▤</span>Bandeja</span>
+              <span class="tools"><span data-tool="edit">≡</span><span>⚙</span></span>
+            </div>
+            <div id="traylist" style="display:flex;flex-direction:column;gap:calc(6 * var(--pt))">
+              <div class="trayempty">Arrastra una de las tarjetas de abajo hasta el notch.</div>
             </div>
           </div>
 
@@ -412,9 +525,8 @@
           <div class="pane p-edit">
             <div class="board">
               <div class="tabs">
-                <span class="tab on"><span class="sym">▬</span>Flit</span>
-                <span class="tab"><span class="sym">▤</span>Bandeja</span>
-                <span class="tools"><span style="color:#00F0FF">✓</span><span>⚙</span></span>
+                <span class="tab on">Personalizar</span>
+                <span class="tools"><span style="color:#00F0FF" data-tool="done">✓</span><span>⚙</span></span>
               </div>
               <div class="band">
                 <div class="modwrap u3"><div class="mod media" style="flex:1"><div class="cover"></div>
@@ -441,14 +553,30 @@
         </div>
       </div>
 
-      <div class="controls" role="group" aria-label="Estados del panel">
-        <button class="chipbtn" data-go="idle" aria-pressed="true">Replegada</button>
-        <button class="chipbtn" data-go="open" aria-pressed="false">Desplegada</button>
-        <button class="chipbtn" data-go="drop" aria-pressed="false">Arrastrando</button>
-        <button class="chipbtn" data-go="edit" aria-pressed="false">Editando</button>
+      <div class="tryouts">
+        <div class="card-drag" draggable="true" data-kind="code" data-title="418 209"
+             style="--k-tint:#7AA2FF"><span class="g2">#</span>
+          <span>418 209<small>código de acceso</small></span></div>
+        <div class="card-drag" draggable="true" data-kind="link" data-title="figma.com/file/notch-v3"
+             style="--k-tint:#4FD1C5"><span class="g2">↗</span>
+          <span>figma.com/file/notch-v3<small>enlace</small></span></div>
+        <div class="card-drag" draggable="true" data-kind="image" data-title="Captura 4.52 p.m."
+             style="--k-tint:#FFB86B"><span class="g2">◫</span>
+          <span>Captura 4.52 p.m.<small>imagen</small></span></div>
+        <div class="card-drag" draggable="true" data-kind="color" data-title="#00F0FF"
+             style="--k-tint:#00F0FF"><span class="g2">◉</span>
+          <span>#00F0FF<small>color</small></span></div>
       </div>
-      <p class="demo-note">Port directo del panel en SwiftUI: 580 × 165 pt, banda de 74 y el muelle response .22 / damping .75.<br>
-        Los datos son los de un Mac real: Spotify en el minuto 2:51, Terminal al frente, 32° en Ciudad Juárez.</p>
+
+      <div class="tips">
+        <span><b>Acércate</b> al notch para desplegarlo</span>
+        <span><b>Arrastra</b> una tarjeta encima</span>
+        <span><b>Rueda</b> sobre él para el volumen</span>
+        <span><b>Pulsa</b> ❚❚ o la barra de tiempo</span>
+        <span><b>≡</b> para reordenar módulos</span>
+      </div>
+      <p class="demo-note">Funciona de verdad: el transporte pausa, la barra se arrastra, la rueda cambia el volumen<br>
+        y lo que sueltas acaba en la Bandeja. Mismas medidas y muelle que el panel en SwiftUI.</p>
     </div>
   </div>
 </header>
@@ -619,98 +747,275 @@
 </footer>
 
 <script>
+/*
+  Banco de pruebas del panel de Flit.
+
+  No es una animación en bucle: es una réplica funcional. El transporte pausa de
+  verdad, la barra se arrastra, la rueda cambia el volumen, lo que sueltas acaba
+  en la Bandeja y los módulos se reordenan. Un demo que solo se mira no
+  demuestra nada — y menos en una página que pide dinero.
+
+  El estado vive en un solo objeto y una sola función dibuja. Repartir estado
+  por los manejadores es lo que convierte estas cosas en un montón de errores
+  de sincronía.
+*/
 (() => {
-  const island = document.getElementById('island');
-  const screen = document.getElementById('screen');
-  const buttons = [...document.querySelectorAll('[data-go]')];
-  const loop = ['idle', 'open', 'drop', 'open', 'edit'];
-  const hold = { idle: 2400, open: 4600, drop: 3400, edit: 4400 };
-  let step = 0, timer = null, manual = false;
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = (id) => document.getElementById(id);
+  const island = $('island'), screen = $('screen');
 
-  // AppContextMonitor: el panel cambia con la app en primer plano. Es la
-  // función que peor se entiende leyéndola y mejor viéndola, así que cicla.
-  const apps = [
-    { name: 'TERMINAL', tint: '#32D74B', acts: [['⑂','main'], ['↑','Push']] },
-    { name: 'SPOTIFY', tint: '#32D74B', acts: [['♥','Guardar'], ['⧉','Enlace']] },
-    { name: 'EN REUNIÓN', tint: '#7000FF', acts: [['◉','Silenciar'], ['⊗','Salir']] },
-    { name: 'CHROME', tint: '#4FD1C5', acts: [['⇪','Enviar'], ['◫','Leer']] },
-  ];
-  let appIndex = 0;
-  const context = document.getElementById('context');
-  const appName = document.getElementById('appname');
-  const acts = document.getElementById('acts');
+  const DURATION = 194;           // 3:14, la duración real de la pista
+  const st = {
+    mode: 'idle',                 // idle · open · vol · tray · drop · edit
+    playing: true,
+    position: 171,                // el segundo en que estaba
+    volume: 54,
+    hovering: false,
+    dragging: false,
+    tray: [],
+    modules: ['Reproductor', 'Contexto', 'Clima'],
+    bench: ['Portapapeles', 'Batería', 'Reloj', 'Calendario', 'Acciones', 'Dictado', 'Volumen'],
+  };
 
-  function nextApp() {
-    const app = apps[appIndex = (appIndex + 1) % apps.length];
-    context.style.setProperty('--app-tint', app.tint);
-    appName.textContent = app.name;
-    acts.innerHTML = app.acts
-      .map(([sym, label]) => `<span class="act"><span class="sym">${sym}</span>${label}</span>`)
-      .join('');
-  }
+  const clock = (s) => {
+    s = Math.max(0, Math.round(s));
+    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  };
 
-  // hoveredDestination: el destino bajo el cursor se enciende y los demás se
-  // apagan. Aquí se recorre solo para enseñar el gesto completo.
-  const dests = [...document.querySelectorAll('#dests .dest')];
-  let hover = 0, hoverTimer = null;
-  function sweep() {
-    dests.forEach((d, i) => {
-      d.classList.toggle('hot', i === hover);
-      d.classList.toggle('dim', i !== hover);
+  const KINDS = {
+    code:  { tint: '#7AA2FF', sym: '#', act: 'Copiar' },
+    link:  { tint: '#4FD1C5', sym: '↗', act: 'Abrir' },
+    image: { tint: '#FFB86B', sym: '◫', act: 'Ver' },
+    color: { tint: '#00F0FF', sym: '◉', act: 'Copiar hex' },
+  };
+
+  // ── Dibujo ───────────────────────────────────────────────────────────
+  function render() {
+    island.dataset.state = st.mode;
+    screen.dataset.step = st.mode;
+
+    $('playbtn').textContent = st.playing ? '❚❚' : '▶';
+    const f = Math.min(1, st.position / DURATION);
+    $('fill').style.width = (f * 100) + '%';
+    $('elapsed').textContent = clock(st.position);
+    $('left').textContent = '-' + clock(DURATION - st.position);
+
+    // El ecualizador solo corre mientras suena, igual que en la app.
+    document.querySelectorAll('.eq i').forEach(b => {
+      b.style.animationPlayState = st.playing ? 'running' : 'paused';
     });
-    hover = (hover + 1) % dests.length;
+
+    $('volbar').style.width = st.volume + '%';
+    $('volnum').textContent = st.volume + '%';
+    $('volsym').textContent = st.volume < 1 ? '🔇' : st.volume < 34 ? '🔈' : st.volume < 67 ? '🔉' : '🔊';
+
+    renderTray();
+    renderEdit();
   }
 
-  // LayoutStore.shift: un módulo de la paleta entra en la banda.
-  const palette = document.getElementById('palette');
-  function movePill() {
-    const pill = palette.children[1];
-    pill.classList.add('moving');
-    setTimeout(() => {
-      palette.insertBefore(pill, palette.firstChild);
-      setTimeout(() => pill.classList.remove('moving'), 420);
-    }, 420);
+  function renderTray() {
+    const list = $('traylist');
+    if (!st.tray.length) {
+      list.innerHTML = '<div class="trayempty">Arrastra una de las tarjetas de abajo hasta el notch.</div>';
+      return;
+    }
+    // Los más recientes arriba, como en la bandeja real.
+    list.innerHTML = st.tray.slice(0, 3).map((it, i) => {
+      const k = KINDS[it.kind];
+      return `<div class="trayrow" style="--k-tint:${k.tint}">
+        <span class="g">${k.sym}</span>
+        <span class="t">${it.title}</span>
+        <span class="a" data-copy="${i}">${it.done ? '✓ Hecho' : k.act}</span>
+      </div>`;
+    }).join('');
   }
 
-  function paint(state) {
-    island.dataset.state = state;
-    screen.dataset.step = state;
-    buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.go === state)));
+  function renderEdit() {
+    const band = $('editband');
+    if (!band) return;
+    const units = { Reproductor: 3, Contexto: 2, Portapapeles: 2, Acciones: 2 };
+    band.innerHTML = st.modules.map((m, i) => {
+      const u = units[m] || 1;
+      return `<div class="modwrap u${u}" style="position:relative">
+        <div class="mod" style="flex:1;border-style:dashed;border-color:rgba(255,255,255,.22);
+             flex-direction:column;align-items:flex-start;justify-content:center;gap:2px">
+          <span style="font:600 calc(11 * var(--pt))/1.2 var(--body);color:#fff">${m}</span>
+          <span style="font:500 calc(8.5 * var(--pt))/1 ui-rounded,var(--mono);
+                color:rgba(255,255,255,.38)">${u} ${u === 1 ? 'unidad' : 'unidades'}</span>
+        </div>
+        <div class="arrows">
+          <span data-move="${i}:-1" title="Mover a la izquierda">‹</span>
+          <span data-move="${i}:1" title="Mover a la derecha">›</span>
+        </div>
+      </div>`;
+    }).join('');
 
-    clearInterval(hoverTimer);
-    if (state === 'open') nextApp();
-    if (state === 'edit') movePill();
-    if (state === 'drop') { hover = 0; sweep(); hoverTimer = setInterval(sweep, 800); }
-    else dests.forEach(d => d.classList.remove('hot', 'dim'));
+    const pal = $('palette');
+    if (pal) {
+      pal.innerHTML = st.bench
+        .map(m => `<span class="pill" data-add="${m}">+ ${m}</span>`)
+        .join('');
+    }
   }
 
-  function tick() {
-    if (manual) return;
-    paint(loop[step]);
-    step = (step + 1) % loop.length;
-    timer = setTimeout(tick, hold[island.dataset.state]);
-  }
+  // ── El reloj de la reproducción ───────────────────────────────────────
+  setInterval(() => {
+    if (!st.playing) return;
+    st.position += 0.5;
+    if (st.position >= DURATION) st.position = 0;
+    const f = st.position / DURATION;
+    $('fill').style.width = (f * 100) + '%';
+    $('elapsed').textContent = clock(st.position);
+    $('left').textContent = '-' + clock(DURATION - st.position);
+  }, 500);
 
-  buttons.forEach(button => {
-    button.addEventListener('click', () => {
-      manual = true;
-      clearTimeout(timer);
-      paint(button.dataset.go);
-      setTimeout(() => { manual = false; tick(); }, 8000);
-    });
-  });
-
-  // setHovering: acercarse despliega, igual que en la app.
+  // ── Desplegar al acercarse ───────────────────────────────────────────
   island.addEventListener('mouseenter', () => {
-    if (island.dataset.state !== 'idle') return;
-    manual = true; clearTimeout(timer); paint('open');
+    st.hovering = true;
+    if (st.mode === 'idle') { st.mode = 'open'; render(); }
   });
   island.addEventListener('mouseleave', () => {
-    manual = false; clearTimeout(timer); paint('idle');
-    timer = setTimeout(tick, 1400);
+    st.hovering = false;
+    // Editando no se cierra por salirse: se perdería el trabajo a medias, que
+    // es exactamente la queja que tenía el arrastre en la app.
+    if (st.mode === 'edit' || st.dragging) return;
+    setTimeout(() => { if (!st.hovering && !st.dragging && st.mode !== 'edit') { st.mode = 'idle'; render(); } }, 350);
   });
 
-  if (reduced) { paint('open'); } else { tick(); }
+  // ── Transporte ───────────────────────────────────────────────────────
+  island.addEventListener('click', (e) => {
+    const cmd = e.target.closest('[data-cmd]');
+    if (cmd) {
+      if (cmd.dataset.cmd === 'next') st.position = 0;
+      if (cmd.dataset.cmd === 'prev') st.position = Math.max(0, st.position - 30);
+      render();
+      return;
+    }
+    if (e.target.closest('#playbtn')) { st.playing = !st.playing; render(); return; }
+
+    const tab = e.target.closest('[data-tab]');
+    if (tab) { st.mode = tab.dataset.tab === 'tray' ? 'tray' : 'open'; render(); return; }
+
+    const tool = e.target.closest('[data-tool]');
+    if (tool) { st.mode = tool.dataset.tool === 'edit' ? 'edit' : 'open'; render(); return; }
+
+    // Reordenar con las flechas ‹ ›, igual que en el editor real.
+    const move = e.target.closest('[data-move]');
+    if (move) {
+      const [i, d] = move.dataset.move.split(':').map(Number);
+      const j = i + d;
+      if (j >= 0 && j < st.modules.length) {
+        [st.modules[i], st.modules[j]] = [st.modules[j], st.modules[i]];
+        render();
+      }
+      return;
+    }
+
+    // Añadir un módulo de la paleta, respetando la capacidad de 3 de la ranura.
+    const add = e.target.closest('[data-add]');
+    if (add) {
+      const name = add.dataset.add;
+      if (st.modules.length >= 3) {
+        const out = st.modules.pop();
+        st.bench.push(out);
+      }
+      st.modules.push(name);
+      st.bench = st.bench.filter(m => m !== name);
+      render();
+      return;
+    }
+
+    // Acción de una fila de la bandeja.
+    const copy = e.target.closest('[data-copy]');
+    if (copy) {
+      const item = st.tray[Number(copy.dataset.copy)];
+      if (item) {
+        if (navigator.clipboard) navigator.clipboard.writeText(item.title).catch(() => {});
+        item.done = true;
+        render();
+        setTimeout(() => { item.done = false; render(); }, 1400);
+      }
+    }
+  });
+
+  // ── Barra de tiempo: se arrastra ─────────────────────────────────────
+  const rail = $('rail');
+  let scrubbing = false;
+  const seekFrom = (e) => {
+    const r = rail.getBoundingClientRect();
+    st.position = Math.min(DURATION, Math.max(0, ((e.clientX - r.left) / r.width) * DURATION));
+    render();
+  };
+  $('railhit').addEventListener('pointerdown', (e) => {
+    scrubbing = true; seekFrom(e); e.preventDefault();
+  });
+  window.addEventListener('pointermove', (e) => { if (scrubbing) seekFrom(e); });
+  window.addEventListener('pointerup', () => { scrubbing = false; });
+
+  // ── Rueda sobre el notch: volumen ────────────────────────────────────
+  let volTimer = null;
+  island.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    st.volume = Math.min(100, Math.max(0, st.volume - Math.sign(e.deltaY) * 4));
+    if (st.mode !== 'edit') st.mode = 'vol';
+    render();
+    clearTimeout(volTimer);
+    volTimer = setTimeout(() => {
+      st.mode = st.hovering ? 'open' : 'idle';
+      render();
+    }, 1100);
+  }, { passive: false });
+
+  // ── Arrastrar y soltar de verdad ─────────────────────────────────────
+  document.querySelectorAll('.card-drag').forEach(card => {
+    card.addEventListener('dragstart', (e) => {
+      st.dragging = true;
+      e.dataTransfer.setData('text/plain', JSON.stringify({
+        kind: card.dataset.kind, title: card.dataset.title,
+      }));
+      e.dataTransfer.effectAllowed = 'copy';
+      island.classList.add('armed');
+      st.mode = 'drop';
+      render();
+    });
+    card.addEventListener('dragend', () => {
+      st.dragging = false;
+      island.classList.remove('armed');
+      if (st.mode === 'drop') { st.mode = 'idle'; render(); }
+    });
+  });
+
+  // El notch ENTERO acepta lo que traes, no solo el destino exacto: fallar por
+  // un píxel mientras arrastras significaba perder el archivo en el escritorio.
+  island.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    if (st.mode !== 'drop') { st.mode = 'drop'; render(); }
+    const dest = e.target.closest('.dest');
+    document.querySelectorAll('.dest').forEach(d => {
+      d.classList.toggle('hot', d === dest);
+      d.classList.toggle('dim', dest !== null && d !== dest);
+    });
+  });
+
+  island.addEventListener('drop', (e) => {
+    e.preventDefault();
+    let payload;
+    try { payload = JSON.parse(e.dataTransfer.getData('text/plain')); } catch { return; }
+
+    const dest = e.target.closest('.dest');
+    const where = dest ? dest.querySelector('.lbl').textContent : 'Repisa';
+
+    st.tray.unshift({ kind: payload.kind, title: payload.title, where });
+    st.dragging = false;
+    island.classList.remove('armed');
+    document.querySelectorAll('.dest').forEach(d => d.classList.remove('hot', 'dim'));
+
+    // Se abre la Bandeja para que se vea DÓNDE acabó lo que soltaste. Sin esto
+    // el gesto termina en la nada y no queda claro que haya pasado algo.
+    st.mode = 'tray';
+    render();
+  });
+
+  render();
 })();
 </script>
