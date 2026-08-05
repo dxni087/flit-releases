@@ -100,12 +100,32 @@
 
   /* livingGlow: carátula desenfocada 42, saturación 2.2, opacidad .34,
      con máscara de viñeta invertida (radios .11 → .58 del ancho). */
+  /* El contenedor solo gobierna si el halo está o no; el movimiento vive en el
+     pseudoelemento para que una cosa no pise la otra. */
   .ambient{position:absolute;inset:0;opacity:0;transition:opacity .5s ease;z-index:1;
+    -webkit-mask-image:radial-gradient(closest-side,transparent 11%,#000 58%);
+    mask-image:radial-gradient(closest-side,transparent 11%,#000 58%)}
+  /* EL HALO SE MUEVE, Y LATE.
+     Dos periodos incomensurables —19 y 1,05 s— para que la deriva no se sienta
+     cíclica, igual que en la app (allí son 11, 17 y 23 s, y el latido lo manda
+     el nivel real del audio). Se dibuja un 35 % más grande que el panel: al
+     derivar no debe asomar nunca un borde. */
+  .ambient::before{content:"";position:absolute;inset:-18%;
     background:radial-gradient(circle at 30% 30%,var(--art-a),transparent 58%),
                radial-gradient(circle at 72% 70%,var(--art-b),transparent 60%);
     filter:blur(calc(42 * var(--pt))) saturate(2.2);
-    -webkit-mask-image:radial-gradient(closest-side,transparent 11%,#000 58%);
-    mask-image:radial-gradient(closest-side,transparent 11%,#000 58%)}
+    animation:drift 19s ease-in-out infinite, beat 1.05s ease-in-out infinite;
+    animation-play-state:running, var(--beat, running)}
+  @keyframes drift{
+    0%  {transform:translate(0,0) rotate(0deg) scale(1)}
+    28% {transform:translate(3.5%,-2.5%) rotate(2.4deg) scale(1.05)}
+    55% {transform:translate(-1.5%,2.5%) rotate(-1.6deg) scale(1.03)}
+    78% {transform:translate(-3%,-1.5%) rotate(1.2deg) scale(1.06)}
+    100%{transform:translate(0,0) rotate(0deg) scale(1)}}
+  /* El latido: sube la intensidad un punto en el golpe y vuelve. Discreto a
+     propósito — subir movimiento e intensidad a la vez lo convierte en un
+     salvapantallas. */
+  @keyframes beat{0%,100%{opacity:.86}50%{opacity:1}}
   /* Los dos dominantes REALES de la carátula que sonaba al construir esto
      —"Hit the Wall", Gracie Abrams—, extraídos igual que `ambientTint`:
      píxeles agrupados en cubos, descartando grises, y ganan los más poblados.
@@ -799,10 +819,12 @@
     $('elapsed').textContent = clock(st.position);
     $('left').textContent = '-' + clock(DURATION - st.position);
 
-    // El ecualizador solo corre mientras suena, igual que en la app.
+    // El ecualizador y el latido del halo solo corren mientras suena. Un halo
+    // pulsando con la música en pausa delata al instante que es un adorno.
     document.querySelectorAll('.eq i').forEach(b => {
       b.style.animationPlayState = st.playing ? 'running' : 'paused';
     });
+    island.style.setProperty('--beat', st.playing ? 'running' : 'paused');
 
     $('volbar').style.width = st.volume + '%';
     $('volnum').textContent = st.volume + '%';
